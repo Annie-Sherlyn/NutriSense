@@ -1,0 +1,8 @@
+fastapi
+pydantic
+uvicorn
+pandas
+python-multipart
+faster-whisper
+rapidfuzz
+supabase>=2.3.4

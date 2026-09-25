@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <radialGradient id="plateGlow" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#FFFDF9"/>
+      <stop offset="85%" stop-color="#F2E8DC"/>
+      <stop offset="100%" stop-color="#E2D4C3"/>
+    </radialGradient>
+    <radialGradient id="idliSoft" cx="40%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="80%" stop-color="#F7F5EE"/>
+      <stop offset="100%" stop-color="#EBE7DC"/>
+    </radialGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="6" flood-color="#1F2421" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+  <!-- Plate -->
+  <circle cx="80" cy="80" r="72" fill="url(#plateGlow)" filter="url(#shadow)"/>
+  <circle cx="80" cy="80" r="66" fill="none" stroke="#D8C8B5" stroke-width="1.5" stroke-dasharray="3 3"/>
+  <!-- Banana leaf accent -->
+  <path d="M 24 88 C 24 55 55 28 92 24 C 115 22 134 32 142 50 C 120 70 85 92 48 94 Z" fill="#2E9E5B" opacity="0.18"/>
+  <!-- Idli 1 -->
+  <ellipse cx="64" cy="74" rx="34" ry="26" fill="url(#idliSoft)" filter="url(#shadow)"/>
+  <!-- Steam holes / texture -->
+  <circle cx="56" cy="70" r="1.5" fill="#DDD8CE"/>
+  <circle cx="68" cy="68" r="1.2" fill="#DDD8CE"/>
+  <circle cx="62" cy="78" r="1.5" fill="#DDD8CE"/>
+  <!-- Idli 2 overlapping -->
+  <ellipse cx="98" cy="88" rx="32" ry="25" fill="url(#idliSoft)" filter="url(#shadow)"/>
+  <circle cx="94" cy="84" r="1.5" fill="#DDD8CE"/>
+  <circle cx="104" cy="90" r="1.2" fill="#DDD8CE"/>
+  <!-- Sambar bowl -->
+  <circle cx="112" cy="50" r="20" fill="#E8742C" filter="url(#shadow)"/>
+  <circle cx="112" cy="50" r="17" fill="#F2B33D"/>
+  <circle cx="110" cy="48" r="4" fill="#2E9E5B" opacity="0.7"/>
+  <!-- Chutney dollop -->
+  <circle cx="44" cy="108" r="14" fill="#FFFFFF" stroke="#E2D4C3" stroke-width="1.5"/>
+  <circle cx="43" cy="106" r="2" fill="#1F5B45" opacity="0.8"/>
+  <circle cx="46" cy="109" r="1.5" fill="#1F5B45" opacity="0.6"/>
+</svg>

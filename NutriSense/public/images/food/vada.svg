@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <radialGradient id="vadaGold" cx="40%" cy="35%" r="65%">
+      <stop offset="0%" stop-color="#F7C469"/>
+      <stop offset="70%" stop-color="#D9822B"/>
+      <stop offset="100%" stop-color="#A85412"/>
+    </radialGradient>
+    <filter id="shadowVada" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#1F2421" flood-opacity="0.16"/>
+    </filter>
+  </defs>
+  <!-- Plate -->
+  <circle cx="80" cy="80" r="70" fill="#FBF6EE" stroke="#E5D9C8" stroke-width="2"/>
+  <!-- Leaf -->
+  <ellipse cx="80" cy="80" rx="58" ry="46" fill="#2E9E5B" opacity="0.15"/>
+  <!-- Vada body -->
+  <path d="M 80 32 C 108 32 130 54 130 82 C 130 110 108 132 80 132 C 52 132 30 110 30 82 C 30 54 52 32 80 32 Z M 80 66 C 72 66 66 73 66 82 C 66 91 72 98 80 98 C 88 98 94 91 94 82 C 94 73 88 66 80 66 Z" fill="url(#vadaGold)" filter="url(#shadowVada)"/>
+  <!-- Crispy texture flecks -->
+  <circle cx="62" cy="56" r="2.2" fill="#803D0C"/>
+  <circle cx="102" cy="62" r="2.5" fill="#803D0C"/>
+  <circle cx="112" cy="88" r="2" fill="#803D0C"/>
+  <circle cx="56" cy="100" r="2.4" fill="#803D0C"/>
+  <circle cx="82" cy="116" r="2" fill="#803D0C"/>
+  <!-- Curry leaf fleck -->
+  <path d="M 98 102 C 103 98 107 99 106 104 C 104 107 100 106 98 102 Z" fill="#1F5B45"/>
+</svg>

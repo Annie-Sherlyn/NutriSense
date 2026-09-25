@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <defs>
+    <linearGradient id="dosaCrust" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCE19B"/>
+      <stop offset="45%" stop-color="#EAA642"/>
+      <stop offset="75%" stop-color="#B86518"/>
+      <stop offset="100%" stop-color="#F2BE66"/>
+    </linearGradient>
+  </defs>
+  <!-- Background dish plate -->
+  <circle cx="80" cy="80" r="70" fill="#FBF6EE" stroke="#E2D4C3" stroke-width="2"/>
+  <!-- Dosa roll / cone shape -->
+  <path d="M 24 100 L 136 45 C 142 55 138 72 124 95 L 34 116 C 26 114 20 108 24 100 Z" fill="url(#dosaCrust)"/>
+  <!-- Crisp roasted ridges -->
+  <path d="M 45 92 L 115 56" stroke="#944B0C" stroke-width="2.5" opacity="0.6" stroke-linecap="round"/>
+  <path d="M 60 98 L 122 68" stroke="#944B0C" stroke-width="2" opacity="0.5" stroke-linecap="round"/>
+  <!-- Ghee sheen -->
+  <path d="M 50 82 C 75 68 95 60 120 54" stroke="#FFF7D6" stroke-width="2" opacity="0.7"/>
+  <!-- Small chutney bowls -->
+  <circle cx="45" cy="40" r="14" fill="#FFFFFF" stroke="#E2D4C3" stroke-width="1.5"/>
+  <circle cx="45" cy="40" r="11" fill="#42B870" opacity="0.65"/>
+  <circle cx="80" cy="32" r="14" fill="#FFFFFF" stroke="#E2D4C3" stroke-width="1.5"/>
+  <circle cx="80" cy="32" r="11" fill="#E8742C" opacity="0.8"/>
+</svg>

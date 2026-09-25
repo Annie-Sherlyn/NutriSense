@@ -1,0 +1,380 @@
+<USER_REQUEST>
+# NutriSense — Frontend Master Prompt (v2)
+
+**How to use:** Put the 3 reference images in `docs/reference/` inside your repo (or attach them), open Claude Code (or Claude with file access) in the repo root, and paste everything below the line. The images define the **flow and information architecture only**. The prompt overrides their visual style and mascot.
+
+---
+
+# PROMPT START
+
+## 0. ROLE AND MISSION
+
+Act as a Senior Frontend Engineer, Senior UI/UX Designer, and Frontend Architect working as one person.
+
+Build the **complete frontend** of **NutriSense**, "An Explainable, Multimodal Nutrition Companion for Real-World Indian Eating", for a hackathon.
+
+The product answers one question: **"What should I eat next, based on what I have already eaten?"**
+
+Core loop:
+`FOOD INPUT → FOOD UNDERSTANDING → NUTRITION ESTIMATE → DAILY LOG → NUTRIENT GAP → PERSONALIZED, EXPLAINED RECOMMENDATION`
+
+Input methods: dish photo, restaurant menu photo, food-delivery screenshot, voice, manual search, and an optional health/lab report.
+
+The product must feel like decision support and nutrient balance for Indian food, not a calorie counter. When someone opens it, they should think: *"This understands what I'm trying to eat, not just what I ate."*
+
+## 1. SCOPE
+
+**Build now:** the full working frontend, with a clean service layer running on mock implementations.
+
+**Do NOT build now:** backend, database, ML/DL models, OCR engine, speech model, recommendation engine, medical analysis. Only prepare clean integration boundaries so the backend, DL, OCR and speech services plug in later without touching the UI.
+
+## 2. NON-NEGOTIABLES
+
+1. **One responsive web app, one deployed URL**, usable on desktop, laptop, tablet, Android and iPhone, from 320px to ultra-wide. No separate mobile project and no React Native.
+2. **PWA-ready** (installable from the same URL).
+3. **No green mascot.** Do not reuse or imitate the green creature in the reference images. Use the original **NutriMotes** system (section 7).
+4. **Animated splash of exactly ~5 seconds with a "Skip" button** in the top-right, visible for the whole animation (section 8).
+5. **Every step in the reference images exists** as a working screen (section 10). Do not merge or omit screens that look similar.
+6. **Login / Register / Forgot Password / Logout** using Firebase Authentication, with **Demo Mode** fallback when env vars are missing.
+7. **`.env.example` exists and real `.env` files are git-ignored.** No secrets in code.
+8. **Components never import mock data.** Only `services/` may import from `mocks/` (enforce with an ESLint `no-restricted-imports` rule).
+9. **Every recommendation shows "why it was recommended"** and uses estimate ranges, never false precision.
+10. **Not green-dominant, not template-looking, not a phone mock centered on a desktop screen.**
+
+## 3. TECH STACK (locked — don't debate)
+
+React 18 + TypeScript (strict) + Vite + Tailwind CSS + React Router v6 + Framer Motion + Firebase Auth (modular SDK) + lucide-react + `vite-plugin-pwa` + `@fontsource` (self-hosted fonts).
+
+- State: React Context + `useReducer`, persisted to `localStorage` (versioned key, e.g. `nutrisense:v1:*`). No Redux.
+- Charts and rings: hand-built SVG components. No chart library.
+- Animation: Framer Motion, CSS and SVG only. No video and no heavy Lottie files.
+- No `any`. Routes lazy-loaded with `React.lazy` + `Suspense`.
+- Scripts: `dev`, `build` (`tsc -b && vite build`), `preview`, `typecheck`, `lint`.
+
+## 4. FOLDER STRUCTURE (keep it exactly this simple)
+
+If a React/Vite app already exists in the repo, **inspect it first** (`package.json`, `src/`, routing, styles) and reuse it. Otherwise initialize one.
+
+```
+src/
+├── assets/            images/ (local food SVGs/WebP), icons/, animations/
+├── components/
+│   ├── common/        Button, IconButton, Card, Badge, ConfidenceBadge, Tabs, Modal, BottomSheet,
+│   │                  Toast, Skeleton, EmptyState, ErrorState, PageHeader, SearchBar, FilterChip, UploadZone
+│   ├── layout/        AppShell, BottomNav, Sidebar, TopBar, ProtectedRoute
+│   ├── nutrition/     NutrientCard, NutrientProgress, ProgressRing, NutrientOrbit, RangeBar,
+│   │                  WhyThisRecommendation
+│   ├── food/          FoodImage (with fallback), FoodCard, RecommendationCard, MealCard, PortionControl
+│   └── animations/    NutriMote, MoteBurst, ScanLine, Waveform, SplashScene
+├── pages/             auth/ onboarding/ dashboard/ meal/ reports/ explore/ profile/
+├── services/          api.ts, auth.service.ts, food.service.ts, nutrition.service.ts,
+│                      recommendation.service.ts, ocr.service.ts, speech.service.ts, report.service.ts
+├── mocks/             foods.ts, meals.ts, nutrition.ts, recommendations.ts   (imported ONLY by services)
+├── hooks/  context/  types/  utils/
+├── config/            firebase.ts, env.ts, tokens.ts
+├── routes/            AppRoutes.tsx
+├── App.tsx  main.tsx
+```
+
+Root files: `.env.example`, `.gitignore`, `README.md`, `package.json`, `vite.config.ts`, `vercel.json` (SPA rewrite), `tailwind.config.ts`, `public/` (manifest icons, favicon).
+
+## 5. API-READY SERVICE LAYER
+
+Data flow today: `Component → hook → service → mock`. Later: `Component → hook → service → backend`. The UI never changes.
+
+**Rules**
+- Every service function returns `Promise<T>` with typed input and output.
+- Each service has a single switch: `USE_MOCK` from `VITE_USE_MOCK_API` (default `true`). The mock branch lives inside the service. The real branch calls `api.ts`.
+- `api.ts` provides one `request<T>()` wrapper: base URL from `VITE_API_BASE_URL`, attaches the Firebase ID token, 20s timeout, supports `FormData` for uploads and normalizes errors into `AppError { code, message, recoverable, action }`.
+- Error codes: `NETWORK`, `UNAUTHORIZED`, `FILE_TOO_LARGE`, `UNSUPPORTED_FORMAT`, `IMAGE_UNPROCESSABLE`, `LOW_CONFIDENCE`, `NO_TEXT_DETECTED`, `SERVICE_UNAVAILABLE`.
+- Mocks simulate realistic latency (600–1800ms) and can simulate errors through a dev toggle (Settings → Developer, visible in Demo Mode only).
+- Add `// TODO(BACKEND|DL|OCR|SPEECH|RECOMMENDATION): …` comments **only** at these boundaries. Never scatter TODOs elsewhere.
+
+**Endpoint map to prepare (interfaces only, do not implement a backend)**
+
+| Service | Function | Endpoint | Integration tag |
+|---|---|---|---|
+| auth | login / register / logout / reset | `POST /auth/login`, `POST /auth/register` (Firebase for now) | BACKEND |
+| profile | get / update | `GET /profile`, `PUT /profile` | BACKEND |
+| food | analyzeImage(file) → `FoodCandidate[]` | `POST /food/image/analyze` | DL |
+| food | search(q) | `GET /foods/search?q=` | BACKEND |
+| food | getNutrition(id) | `GET /foods/:id/nutrition` | BACKEND |
+| nutrition | calculate(items, portions) | `POST /nutrition/calculate` | BACKEND |
+| nutrition | logMeal / todayMeals | `POST /meals`, `GET /meals/today` | BACKEND |
+| nutrition | dailySummary / weeklySummary | `GET /nutrition/daily-summary`, `GET /nutrition/weekly-summary` | BACKEND |
+| ocr | menu(file) → `OCRResult` | `POST /ocr/menu` | OCR |
+| ocr | deliveryScreenshot(file) | `POST /ocr/delivery-screenshot` | OCR |
+| speech | transcribe(audioBlob) → `SpeechResult` | `POST /speech/transcribe` | SPEECH |
+| recommendation | recommend(context) | `POST /recommendations` | RECOMMENDATION |
+| report | analyze(file) → `LabReport` | `POST /reports/analyze` | BACKEND |
+| assistant | chat(message, context) | `POST /assistant/chat` | BACKEND |
+
+**Types** (in `types/`, no `any`): `User`, `UserProfile`, `NutritionGoal`, `Food`, `FoodAlias`, `FoodCandidate` (id, name, confidence 0–1), `Meal`, `MealItem`, `Portion`, `NutritionRange` (`{min, max, unit}`), `MacroNutrients`, `MicroNutrients`, `DailyNutritionSummary`, `WeeklyNutritionSummary`, `NutrientGap`, `Recommendation` (includes `reasons: Reason[]` where each reason has `key`, `label`, `passed`, `profileField?`), `MenuItem`, `OCRResult`, `SpeechResult`, `LabReport`, `Achievement`, `AppError`.
+
+Confidence bands: **High ≥ 0.80, Medium 0.50–0.79, Low < 0.50**. If the top dish prediction is below 0.60, show a "We're not sure" state that offers Choose Another Dish and Search Manually.
+
+## 6. AUTH, DEMO MODE, ENV
+
+- `config/firebase.ts` initializes Firebase **only** from `import.meta.env.VITE_FIREBASE_*`. `config/env.ts` validates the env and exposes `isFirebaseConfigured`.
+- `auth.service.ts` defines an `AuthService` interface with two implementations: `FirebaseAuthService` (email/password, Google Sign-In, reset email, `onAuthStateChanged`) and `DemoAuthService` (localStorage). The factory picks one automatically. A discreet "Demo Mode" badge is shown when Firebase is not configured.
+- Login screen: email + password, "Continue with Google" (enabled only when Firebase is configured), and **"Try the demo instantly"**, a one-tap guest login for judges.
+- Friendly mapping for Firebase errors (wrong password, user not found, email in use, weak password, network, too many requests), each with a recovery action.
+- Post-auth routing: new user → `/onboarding`; returning user → `/dashboard`. `ProtectedRoute` guards all app routes.
+- `.env.example`:
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+VITE_USE_MOCK_API=true
+VITE_API_BASE_URL=
+```
+- `.gitignore` must include `.env`, `.env.*` (except `.env.example`), `node_modules`, `dist`.
+
+## 7. VISUAL IDENTITY AND DESIGN SYSTEM
+
+**Direction:** premium, warm, editorial, calm. Cream canvas, deep forest green used **selectively** (primary buttons, logo, key accents), never as a full-page theme. Generous whitespace, large rounded cards (20–28px), soft layered shadows, glass panels only on overlays and sheets, short purposeful motion.
+
+**Tokens** (`config/tokens.ts` mirrored into Tailwind theme and CSS variables). Verify 4.5:1 contrast for text in both themes.
+
+| Token | Light | Dark |
+|---|---|---|
+| bg | `#FBF6EE` | `#14171A` |
+| surface | `#FFFFFF` | `#1D2125` |
+| surface-2 | `#F5EDE0` | `#252A2F` |
+| ink | `#1F2421` | `#F2EEE6` |
+| muted | `#6B6F68` | `#A5A9A2` |
+| brand (forest) | `#1F5B45` | `#5FBF95` |
+| peach / orange / amber | `#FFD9C2` / `#E8742C` / `#F2B33D` | same, tuned |
+| lavender / mint | `#DCD1F7` / `#D5EEE1` | tuned |
+
+**Semantic nutrient colors:** Protein `#2E9E5B` · Carbs `#F2B33D` · Fat `#7C8CF0` · Fiber `#2F9E8F` · Iron `#E2582E` · Calcium `#2BB3CE` · B12 `#7B5CD6` · Folate `#D9649B` · Sodium `#8A8F98` · Vitamin D `#F0A63A`.
+
+**Typography:** a distinctive display face for headings (e.g. Fraunces or Sora) plus a clean body face (e.g. Inter or Plus Jakarta Sans), self-hosted with `@fontsource`. Define a type scale, spacing scale, radius scale, shadow scale and duration tokens (`fast 120ms`, `base 220ms`, `slow 420ms`).
+
+**Layouts (genuinely different, not stretched)**
+- **< 768px:** single column, fixed bottom nav (Home, Log, Explore, Reports, Profile), safe-area insets (`env(safe-area-inset-*)`, `viewport-fit=cover`), 44px+ touch targets, modals become bottom sheets, no horizontal scroll except intentional carousels.
+- **768–1199px:** two-column grids, collapsible sidebar.
+- **≥ 1200px:** left sidebar (Dashboard, Log Meal, Explore, Reports, Achievements, Ask NutriSense, Profile), top header with search and theme toggle, 2–3 column dashboard grid, larger visualizations, side panels for recommendation details. Content max-width about 1440px.
+
+**Micro-interactions:** card lift on hover, press feedback on buttons, rings animate when entering the viewport, numbers count from their previous value, upload zones glow on drag-over, recommendation cards reorder smoothly with Framer `layout` when filters change, tiny particle burst on success. Nothing blocks input, and everything honors `prefers-reduced-motion` plus an in-app "Reduce motion" setting.
+
+## 8. NUTRIMOTES — ORIGINAL CREATURE SYSTEM
+
+Small **abstract nutrient organisms** built as SVG React components: `<NutriMote type mood size />`. `type` is one of the seven below. `mood` is `idle | curious | happy | celebrating | resting`.
+
+They must feel modern, organic and slightly futuristic. They must not resemble Pokémon, Duolingo, emoji, or any existing mascot. **No limbs, no mouths, no cartoon faces.** At most two tiny dot "eyes" or a single soft glowing core. Character comes from shape, glow, and motion.
+
+| Mote | Design |
+|---|---|
+| Protein | Linked chain of 3 rounded hexagon beads that flex like a folding chain (green) |
+| Iron | Warm rust-orange faceted pebble with a metallic sheen and a slow shimmer |
+| Calcium | Pale translucent crystal shard cluster that catches light |
+| B12 | Indigo-violet glowing orb with a thin orbiting halo ring |
+| Hydration | Transparent droplet with a moving inner ripple |
+| Energy | Small amber ember-particle that pulses like a heartbeat |
+| Fiber | Abstract fern/leaf spiral (green-teal) |
+
+**Behavior:** gentle idle float (3–5s loops), slow blink or glow pulse. Motes **react to progress**: brighter and closer to the center as their nutrient nears the target, and one short celebration when it hits 100%. They are limited to onboarding, splash, loading/scan states, success states, nutrient cards (small), empty states, streaks, achievement badges, and recommendation explanations. Never a constantly bouncing mascot. Achievement badges are abstract compositions of motes.
+
+## 9. SPLASH SCREEN (~5 seconds, skippable)
+
+Route `/`. Warm dark charcoal canvas that crossfades to cream on exit. Built with SVG + Framer Motion (under about 30KB, no video).
+
+| Time | Beat |
+|---|---|
+| 0.0–0.8s | One tiny glowing spark fades in at the center |
+| 0.8–2.5s | Five motes (Protein, Iron, Calcium, B12, Fiber) enter on curved paths from different edges, orbit and gently attract each other |
+| 2.5–3.5s | Motes merge and morph into the NutriSense mark (a leaf with an orbit line) drawn with a stroke-then-fill reveal |
+| 3.5–4.3s | Wordmark **NutriSense** fades in letter by letter |
+| 4.3–5.0s | Tagline **"Better choices begin with understanding."**, then smooth transition |
+
+- **Skip** button: top-right, always visible (respects safe area), 44px+ target, keyboard focusable, `aria-label="Skip intro"`. It navigates immediately and cancels the timer, and timers are cleaned up on unmount.
+- Auto-navigates at ~5000ms. Routing after splash: authenticated + onboarded → `/dashboard`; authenticated, not onboarded → `/onboarding`; otherwise → `/welcome` ("Get Started" / "I already have an account").
+- Play once per session (`sessionStorage`). Settings has a "Replay intro" option.
+- Reduced motion: no particle travel, a simple logo crossfade, and it still finishes within 5s.
+
+## 10. SIGNATURE INTERACTIONS (what makes it unique)
+
+1. **Nutrient Orbit** (dashboard hero): concentric rings for Protein, Carbs, Fat, Fiber, Iron, Calcium, B12, each with its NutriMote orbiting on its ring. Tapping a ring opens a sheet with the gap, food sources, and a "Find foods" action.
+2. **What-if Preview:** "Preview impact" on any recommendation, comparison card or ranked menu item animates the rings with a dashed projected fill before the user adds anything.
+3. **Range Bars:** uncertainty shown as a translucent band around a point marker, plus a confidence badge, for every estimate.
+4. **Time-aware Home:** greeting, tint and primary CTA shift by meal window (breakfast, lunch, snack, dinner). A contextual line such as "You usually log lunch around now" is derived from the user's log timestamps.
+5. **Interactive Explainability:** `WhyThisRecommendation` shows a checklist that animates in. Each item links to the profile field behind it (for example tapping "within ₹200 budget" opens the budget editor).
+6. **Desktop quick search:** `⌘/Ctrl + K` opens a food search palette.
+7. **Judge helpers (Demo Mode only):** "Load sample week" (fills weekly report and streak) and "Simulate error" toggles in Settings → Developer.
+
+## 11. SCREENS AND ROUTES (build ALL)
+
+Reference images: **R1** = first image (22 screens), **R2** = second (17), **R3** = third (22). Keep their flow, but redesign visually per sections 7–8.
+
+### A. Splash and Auth
+| Route | Screen | Must include |
+|---|---|---|
+| `/` | Splash | Section 9 |
+| `/welcome` | Welcome | Get Started, "Already have an account? Log in", animated NutriMotes hero |
+| `/login` | Login | Email/password, Google, Try demo, forgot link, validation, error recovery |
+| `/register` | Create account | Name, email, password + confirm, strength hint, validation |
+| `/forgot-password` | Reset | Email field, success state ("Check your inbox") |
+
+### B. Onboarding (R1 #2–6, R2 #2–3, R3 #2–6)
+| Route | Screen | Must include |
+|---|---|---|
+| `/onboarding` | Intro carousel | 3–4 slides: Track what you eat / Understand nutrient gaps / Make better food choices; animated NutriMotes; dots; Next/Skip |
+| `/onboarding/goals` | Goal selection | Better Health, Build Muscle, Manage Weight, More Energy, Improve Digestion, Balanced Nutrition. Single select, interactive cards |
+| `/onboarding/setup` | Personalize | "How would you like to personalize NutriSense?": Enter Details Manually / Upload Health-Test Report / **Skip for now** |
+| `/onboarding/manual-profile` | Manual profile | Diet type (Veg, Vegan, Eggitarian, Non-Veg), allergies (multi-select + custom), nutrition goal, priority nutrients, budget per meal (slider ₹50–₹500), optional age group, activity level, location, cuisine likes/dislikes |
+| `/onboarding/report` | Report upload | Drag/drop + tap to choose, PDF/JPG/JPEG/PNG, size limit, file preview, progress, "Reading report…" animation. Result copy: *"Potential nutrient-related information found in uploaded report. Backend analysis will be connected later."* **Never show a diagnosis** |
+| `/onboarding/confirm` | Profile confirmation | Profile as attractive summary cards with edit links |
+| `/onboarding/complete` | Success | Mote celebration, "You're ready to make smarter food choices.", **Start Exploring** |
+
+### C. Home and Logging (R1 #7–14, R2 #4–12, R3 #7–13)
+| Route | Screen | Must include |
+|---|---|---|
+| `/dashboard` | Home | Greeting with date, Nutrient Orbit, "Based on meals you have logged", main insight ("~40g protein so far, ~20g left toward your target") + **Find what to eat next**, quick actions (Photo, Scan Menu, Delivery Screenshot, Voice, Search, Upload Report), Recent Meals, Today's Gap, Recommended Next Meal, current streak, rotating "Did you know?" tip, "Last time you were 18g short of protein" when relevant |
+| `/log` | Log hub | "How would you like to log your meal?" Photo, Menu, Delivery screenshot, Voice, Manual search, optional Lab report; unique icon and micro-interaction per option |
+| `/log/photo` | Dish capture | Camera-style UI (`getUserMedia` with a file-input `capture="environment"` fallback), gallery button, flash toggle, framing tips, then an "Analyzing your dish…" scanning animation with motes |
+| `/log/photo/result` | Prediction | "We think this is…", ranked candidates with confidence (Idly + Vada + Sambar 92%, Idly + Chutney 5%, Vada + Sambar 2%, Other 1%), **user must confirm**, Confirm / Retake Photo / Choose Another Dish; low-confidence state |
+| `/log/portion` | Portion | Dish image + name, quantity − / n / +, Small / Regular / Large, preparation style (Normal, Low Oil, Extra Oil, Homemade, Restaurant Style), **Calculate Nutrition** |
+| `/log/nutrition` | Estimate | Tabs Macronutrients / Micronutrients, **Per serving / Per 100g** toggle, ranges (Calories 420–500 kcal, Protein 12–16 g), Range Bars, confidence badge, basis note ("Estimate based on a typical restaurant-style serving and selected portion."), expandable **"Why is this a range?"**, **Add to Log** |
+| `/log/save` | Log this meal | Meal type (Breakfast/Lunch/Snack/Dinner, auto-suggested), date (Today / Past date), optional notes, Save Meal |
+| `/log/success` | Meal logged | Short particle burst, meal name, estimate, updated progress ring with animated values, links: View details / Log another |
+| `/streak` | Streak moment | Week-day dots, streak count, calm quote ("Small steps. Big changes."), shown after milestone logs, dismissible |
+
+### D. Other Input Flows (R1 #17–20, R2 #7–10, R3 #17–20)
+| Route | Screen | Must include |
+|---|---|---|
+| `/log/menu` | Menu OCR | Upload/camera → "Reading menu…" with **moving scan-line** → extracted items list with select/deselect, editable name and price, total → **Analyze Menu** |
+| `/log/menu/results` | Ranked menu | Items ranked by goal, current gap, diet, allergy and budget, each with reasons and What-if Preview |
+| `/log/delivery` | Delivery screenshot | Upload → "Extracting items…" → editable dish, price, restaurant, rating, description, quantity steppers, total → **Analyze Choices**. Treat as a plain screenshot. **Never claim Swiggy/Zomato integration** |
+| `/log/delivery/results` | Ranked choices | Same ranked component as menu results |
+| `/log/voice` | Voice | Animated waveform (real mic level via `AnalyserNode` where permitted), "Listening…", tap to stop, editable transcript ("Two idlis, one vada and filter coffee."), structured result (2 × Idli, 1 × Vada, 1 × Filter Coffee), user confirms. Record an audio `Blob` and pass it to `speech.service`. Permission-denied fallback: type instead |
+| `/log/search` | Manual search | Search bar, popular searches (Idly, Dosa, Vada, Pongal, Upma, Masala Dosa), results with image, kcal and a nutrient clue (Dosa → Masala/Plain/Set/Rava/Mysore), "Can't find your dish? Try a different spelling", debounce, empty state |
+
+### E. Today, Recommendations, Explore
+| Route | Screen | Must include |
+|---|---|---|
+| `/today` | Daily tracking | Breakfast / Lunch / Snack / Dinner sections with logged meals; **Edit, Delete, Change portion**; nutrient progress (Protein 63/100g, Carbs 180/250g, Fat 45/70g, Iron 54%, Calcium 82%, B12 60%); "Based on logged meals"; date switcher; empty state |
+| `/recommendations` | Next-meal recommendations | "It's lunch time.", protein so far / remaining, remaining eating windows, **Recommended for you** cards (image, dish, ~protein, ~kcal, ₹price, reason, confidence, Add to Meal / Compare / View Nutrition), `WhyThisRecommendation`; second tab **Smart Snacks** with filters: High Protein, Low Calorie, Vegetarian, Under ₹100, Iron Rich, Quick (Greek Yogurt + Nuts, Boiled Eggs, Paneer Chaat, Sattu Drink, Sprouts Chaat, Roasted Chana). Animated reorder on filter change. No-recommendation empty state |
+| `/compare` | Compare foods | 2–4 dishes side by side (Calories, Protein, Carbs, Fat, Iron, Calcium, Price). **Goal-based explanation, not "best food"**, for example: "Idli + Sambar aligns more closely with your current protein target while requiring fewer estimated calories." Expandable "Why this recommendation?" |
+| `/explore` | Explore | Search, categories (South Indian, North Indian, Snacks, High-protein, Budget), educational cards, quick links to Compare and Snacks |
+
+### F. Reports, Achievements, Assistant
+| Route | Screen | Must include |
+|---|---|---|
+| `/reports`, `/reports/weekly` | Weekly report | Date range (16–22 Sep), simple trend charts for Protein, Iron, B12, Calcium, Fiber (+ Vitamin D), Nutrient Gaps card in careful language ("Estimated dietary iron intake was below your selected target on most logged days this week"), food-based suggestions, Weekly Consistency, Most Improved Nutrient, Persistent Gap, Logging Completeness; "Log meals for a few days and your weekly patterns will appear here." empty state |
+| `/achievements` | Achievements | Streak overview + badges: First Meal, 3-Day Streak, Protein Goal, Balanced Day, Menu Explorer, Consistent Logger, Micronutrient Explorer. Locked/unlocked states, progress toward each, mote-based abstract badges, elegant unlock animation |
+| `/assistant` | Ask NutriSense | Chat UI with quick prompts ("What nutrient am I low on today?", "Suggest a protein-rich snack.", "What can I eat under ₹150?", "Compare these foods.", "Why did you recommend this?"), mock replies via `assistant.chat()`, typing state. **Secondary feature, not central** |
+
+### G. Profile and Settings (R1 #22, R2 #17, R3 #22)
+| Route | Screen | Must include |
+|---|---|---|
+| `/profile` | Profile | Avatar, name, email; sections: My Nutrition Profile (Diet, Allergies, Goal, Priority nutrient, Budget), Edit Profile, Connected Devices (optional/future), App Settings, Help & Support, **Logout** |
+| `/profile/edit` | Edit profile | All manual-profile fields, validation, save toast |
+| `/settings` | Settings | Theme (Light / Dark / System), notification toggles (meal reminders, recommendation reminders, weekly report), Units, Privacy, Reduce motion, Replay intro, Developer (Demo Mode), Install app hint |
+| `*` | 404 and offline | Friendly recovery actions |
+
+## 12. CROSS-CUTTING RULES
+
+**Loading states:** contextual and never a blank spinner. Use "Analyzing dish…", "Reading menu…", "Extracting items…", "Preparing nutrition estimate…", "Updating today's nutrition…", "Building recommendation…", "Reading report…", each with a matching animation (motes, scan-line, waveform) plus skeletons for lists and cards.
+
+**Empty states:**
+- No meals: "Nothing logged yet. Add your first meal to start building today's nutrition picture."
+- No weekly data: "Log meals for a few days and your weekly patterns will appear here."
+- No recommendation: "We need at least one logged meal or a selected nutrition goal before generating personalized suggestions."
+
+**Error states (each with a recovery action):** image could not be processed (Try again / Retake photo), menu text not detected (Edit extracted item / Try another photo), food not recognized confidently (Search manually), no internet (Retry, offline banner), Firebase auth error, file too large, unsupported format, backend unavailable placeholder.
+
+**Copy rules (strict)**
+- Never: "You have iron deficiency." Always: "Your estimated dietary iron intake appears below your selected target based on logged meals."
+- Never: "Contains exactly 420 calories." Always a range: "Estimated 400–460 kcal."
+- No diagnosis, no medical claims, no guilt, shame, fear or anxiety language. Tone is encouraging and factual.
+- **Every recommendation must expose `WhyThisRecommendation`**, for example: ✓ Fits vegetarian preference · ✓ No declared peanut allergen · ✓ ₹140, within your ₹200 budget · ✓ ~16g protein · ✓ Protein is one of your lower nutrients today.
+- Return-visit hooks come only from usefulness: daily insight ("You're closest to your calcium goal today."), contextual suggestion, weekly progress, streaks, changing "Did you know?" cards. No dark patterns.
+
+## 13. SEED DATA AND IMAGES
+
+- Mock foods in `mocks/`: Idli, Vada, Sambar, Masala Dosa, Plain Dosa, Rava Dosa, Pongal, Poori, Chapati, Paneer Chilla, Paneer Curry, Curd Rice, Lemon Rice, Sambar Rice, Biryani, Boiled Egg, Filter Coffee, Sattu Drink, Sprouts Chaat, Roasted Chana, Greek Yogurt, Banana, Apple. Each has aliases, per-portion macros and micros (as ranges), diet tags, allergens, price and a `source: "dev-seed"` flag.
+- Mark it clearly in UI and README: **"Development seed data, not clinically verified."**
+- Images: local stylized SVG/WebP food illustrations in `assets/images` (no hotlinking). `FoodImage` handles loading, error and fallback (a tinted tile with the dish initial) and uses `loading="lazy"` with explicit dimensions.
+- Also ship 2–3 sample "photo" fixtures so the dish, menu, delivery and voice mock flows return believable results even from any uploaded file.
+
+## 14. PWA AND DEPLOYMENT (ONE URL)
+
+- `vite-plugin-pwa` with manifest (name, short_name, theme/background colors per theme, `display: standalone`, `start_url: "/"`), 192/512/maskable placeholder icons, offline fallback page, app-shell precache, `apple-touch-icon` and iOS meta tags. Add an "Install app" prompt (`beforeinstallprompt`) plus an iOS "Add to Home Screen" hint.
+- Camera and mic require HTTPS (Vercel provides it) and handle permission denial gracefully.
+- `vercel.json` rewriting all routes to `index.html`.
+- README deployment section: Vercel (preferred) and Firebase Hosting. Include: set all `VITE_*` variables in the Vercel dashboard, and **add the deployed domain to Firebase Console → Authentication → Settings → Authorized domains** (otherwise login fails on the live URL). Mark exactly where to paste the real link: `README.md` → `Live demo: <PASTE_DEPLOYED_URL_HERE>`. Do not invent a URL.
+- Optional: Settings → "Open on your phone" with a QR code of the site origin (lazy-loaded, only if bundle impact is small).
+
+## 15. ACCESSIBILITY AND PERFORMANCE
+
+Semantic HTML landmarks, full keyboard navigation, visible focus rings, ARIA labels, `alt` text, labeled form fields with inline errors, focus trapping in modals and sheets, `aria-live` for toasts and async results, color never the only signal (icons and text accompany the confidence and nutrient colors), and `prefers-reduced-motion` support. Target Lighthouse ≥ 90 for Performance, Accessibility and PWA on mobile. Lazy routes, code-split heavy screens, optimized assets, memoized rings and charts, no large UI libraries.
+
+## 16. EXECUTION PROTOCOL
+
+Don't dump disconnected files. Build in phases. **After every phase run `npm run typecheck`, `npm run lint`, `npm run build`; fix all errors before continuing; commit with a clear message.** If something is ambiguous, choose a sensible default and record it under "Assumptions" in the README. Do not stop until every phase is done.
+
+1. Inspect repo → init/reuse Vite + TS + Tailwind, install dependencies, configure PWA/ESLint rules
+2. Design tokens, fonts, theme (light/dark/system), base common components
+3. Types, `api.ts`, mock data, all services (with mock switch)
+4. Routing, lazy routes, AppShell (bottom nav / sidebar), ProtectedRoute
+5. Auth (Firebase + Demo), Splash, Welcome, Login/Register/Forgot
+6. NutriMote system + animation components
+7. Onboarding (all 7 screens) + profile persistence
+8. Dashboard (Nutrient Orbit, insights, quick actions)
+9. Meal flows: photo → prediction → portion → nutrition → save → success
+10. Menu, delivery, voice, manual search flows + ranked results
+11. Today tracking (edit/delete/change portion) + live summary updates
+12. Recommendations, snacks, What-if Preview, WhyThisRecommendation, Compare
+13. Weekly report, streak, achievements, assistant
+14. Profile, edit profile, settings, error/empty/loading states
+15. Responsive polish (320px → ultra-wide), animation polish, reduced motion, accessibility pass
+16. PWA verification, README, `.env.example`, deployment config, final QA
+
+## 17. DEFINITION OF DONE (verify each and report)
+
+- [ ] Splash auto-advances at ~5s; Skip works at any moment; no leaked timers
+- [ ] Login, Register, Forgot Password work structurally (Firebase and Demo Mode); Logout works
+- [ ] Firebase config only via env; `.env.example` exists; `.env` ignored
+- [ ] Protected routes redirect correctly; onboarding gates first-time users
+- [ ] Onboarding and manual profile setup persist; report upload UI works with validation
+- [ ] Dashboard, photo, menu, delivery, voice and search flows work end to end
+- [ ] Dish confirmation, portion adjustment, nutrition ranges and "Why is this a range?" work
+- [ ] Logging updates Today and the dashboard rings immediately; edit/delete/change-portion work
+- [ ] Every recommendation shows explainability; filters reorder with animation; What-if Preview works
+- [ ] Compare (2–4 items), weekly report, streak, achievements, assistant, profile and settings work
+- [ ] Theme switching works; reduced motion respected
+- [ ] Desktop uses a real dashboard layout; mobile feels native at 320px with no horizontal scroll
+- [ ] No component imports from `mocks/`; no `any`; no broken imports
+- [ ] `npm run typecheck`, `npm run lint` and `npm run build` pass; no unnecessary console errors
+- [ ] PWA installable; `vercel.json` present; README complete
+
+## 18. FINAL REPORT (deliver after implementation)
+
+1. Final folder structure
+2. Important files created
+3. Environment variables required
+4. Firebase setup instructions (including authorized domains)
+5. How to run locally (`npm install`, `npm run dev`, `npm run build`, `npm run preview`)
+6. How mock data currently works
+7. Exact places where the backend will connect
+8. Exact places where DL, OCR and speech models will connect
+9. How to build the production version
+10. How to deploy and get ONE shareable URL (and where to paste it)
+11. Functionality intentionally mocked
+12. Remaining limitations and assumptions
+
+# PROMPT END 
+
+
+do this accordingly and take your time and give me the result fulfilling all my requirements 
+</USER_REQUEST>
+<ADDITIONAL_METADATA>
+The current local time is: 2026-09-19T15:50:59+05:30.
+</ADDITIONAL_METADATA>
+<USER_SETTINGS_CHANGE>
+The user changed setting `Model Selection` from None to Gemini 3.7 Flash (High). No need to comment on this change if the user doesn't ask about it. If reporting what model you are, please use a human readable name instead of the exact string.
+</USER_SETTINGS_CHANGE>

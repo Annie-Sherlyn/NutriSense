@@ -1,0 +1,99 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg: #FBF6EE;
+    --surface: #FFFFFF;
+    --surface-2: #F5EDE0;
+    --ink: #1F2421;
+    --muted: #6B6F68;
+    --brand: #1F5B45;
+    --brand-hover: #184736;
+    
+    --color-protein: #2E9E5B;
+    --color-carbs: #F2B33D;
+    --color-fat: #7C8CF0;
+    --color-fiber: #2F9E8F;
+    --color-iron: #E2582E;
+    --color-calcium: #2BB3CE;
+    --color-b12: #7B5CD6;
+    --color-vitamind: #F0A63A;
+  }
+
+  .dark {
+    --bg: #14171A;
+    --surface: #1D2125;
+    --surface-2: #252A2F;
+    --ink: #F2EEE6;
+    --muted: #A5A9A2;
+    --brand: #5FBF95;
+    --brand-hover: #74CCA5;
+
+    --color-protein: #42B870;
+    --color-carbs: #F5BE59;
+    --color-fat: #93A0F5;
+    --color-fiber: #42B8A7;
+    --color-iron: #F06A41;
+    --color-calcium: #48C6DF;
+    --color-b12: #9275E5;
+    --color-vitamind: #F5BE59;
+  }
+
+  html {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg);
+    color: var(--ink);
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: 'Fraunces', serif;
+    letter-spacing: -0.02em;
+  }
+}
+
+/* Safe area padding utilities for mobile edge-to-edge */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.pt-safe {
+  padding-top: env(safe-area-inset-top, 16px);
+}
+
+/* Glass panel utility */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+}
+.dark .glass-panel {
+  background: rgba(29, 33, 37, 0.80);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(107, 111, 104, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(107, 111, 104, 0.45);
+}

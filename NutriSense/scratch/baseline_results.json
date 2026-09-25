@@ -1,0 +1,103 @@
+{
+  "total_expected": 22,
+  "total_detected": 8,
+  "true_positives": 5,
+  "false_positives": 3,
+  "duplicates": 0,
+  "food_recall": 0.2273,
+  "food_precision": 0.625,
+  "classification_accuracy": 0.6,
+  "avg_latency_ms": 436.3,
+  "per_class": {
+    "apple": {
+      "expected": 1,
+      "detected": 1,
+      "correct_class": 1
+    },
+    "banana": {
+      "expected": 1,
+      "detected": 1,
+      "correct_class": 1
+    },
+    "biriyani": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "beetroot poriyal": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "boiled egg": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "puthina chutney": {
+      "expected": 2,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "ven pongal": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "sambar": {
+      "expected": 2,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "medu vada": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "idly": {
+      "expected": 3,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "sadham": {
+      "expected": 1,
+      "detected": 1,
+      "correct_class": 0
+    },
+    "carrot poriyal": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "sambar sadham": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "parupu vadai": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "chappathi": {
+      "expected": 1,
+      "detected": 1,
+      "correct_class": 1
+    },
+    "panneer masal": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    },
+    "samosa": {
+      "expected": 1,
+      "detected": 1,
+      "correct_class": 0
+    },
+    "murukku": {
+      "expected": 1,
+      "detected": 0,
+      "correct_class": 0
+    }
+  }
+}

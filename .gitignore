@@ -1,0 +1,25 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+__pycache__/
+*.pyc
+.venv/
+venv/
+*.log
+.DS_Store
+.vscode/
+.idea/
+
+# Training dataset
+NutriSense/Dataset/
+NutriSense/scratch/crop_dataset/
+NutriSense/Dataset_checking/
+
+# Local testing assets
+NutriSense/Dataset_checking/
+NutriSense/testing/
+NutriSense/scratch/eval_suite/
+test_audio*.mp3
+test_jan.*

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <circle cx="80" cy="80" r="70" fill="#F4EDE2" stroke="#E2D4C3" stroke-width="2"/>
+  <circle cx="80" cy="80" r="62" fill="#FFFFFF" stroke="#D5C5B2" stroke-width="1.5"/>
+  <!-- Dum rice bed with saffron & orange shades -->
+  <ellipse cx="80" cy="86" rx="48" ry="34" fill="#FCE9BD"/>
+  <ellipse cx="80" cy="82" rx="42" ry="28" fill="#F2B33D" opacity="0.6"/>
+  <!-- Rice grains -->
+  <ellipse cx="62" cy="74" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(20 62 74)"/>
+  <ellipse cx="76" cy="68" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(-30 76 68)"/>
+  <ellipse cx="94" cy="72" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(15 94 72)"/>
+  <ellipse cx="84" cy="88" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(45 84 88)"/>
+  <ellipse cx="68" cy="94" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(-15 68 94)"/>
+  <ellipse cx="98" cy="90" rx="4" ry="1.2" fill="#FFFFFF" transform="rotate(-25 98 90)"/>
+  <!-- Brown caramelized onions (birista) -->
+  <path d="M 60 82 Q 68 80 72 84" stroke="#6E350E" stroke-width="1.8" fill="none"/>
+  <path d="M 88 78 Q 94 76 98 82" stroke="#6E350E" stroke-width="1.8" fill="none"/>
+  <!-- Mint leaf & green chili garnish -->
+  <ellipse cx="80" cy="76" rx="8" ry="4" fill="#2E9E5B" transform="rotate(-20 80 76)"/>
+  <circle cx="82" cy="74" r="1.5" fill="#1F5B45"/>
+</svg>

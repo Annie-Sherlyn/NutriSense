@@ -1,0 +1,284 @@
+{
+  "classes": [
+    {
+      "index": 0,
+      "folderName": "apple",
+      "id": "food-apple",
+      "name": "Fresh Apple",
+      "regionalName": "ஆப்பிள்",
+      "category": "fruits",
+      "estimatedKcal": "70–95 kcal",
+      "image": "/images/food/fruit.svg"
+    },
+    {
+      "index": 1,
+      "folderName": "banana",
+      "id": "food-banana",
+      "name": "Fresh Banana",
+      "regionalName": "வாழைப்பழம்",
+      "category": "fruits",
+      "estimatedKcal": "80–110 kcal",
+      "image": "/images/food/fruit.svg"
+    },
+    {
+      "index": 2,
+      "folderName": "beetroot poriyal",
+      "id": "food-beetroot-poriyal",
+      "name": "Beetroot Poriyal",
+      "regionalName": "பீட்ரூட் பொரியல்",
+      "category": "lunch",
+      "estimatedKcal": "60–90 kcal",
+      "image": "/images/food/curry.svg"
+    },
+    {
+      "index": 3,
+      "folderName": "biriyani",
+      "id": "food-biriyani",
+      "name": "Hyderabadi / Ambur Biriyani",
+      "regionalName": "பிரியாணி / ಬಿರಿಯಾನಿ",
+      "category": "lunch",
+      "estimatedKcal": "380–480 kcal",
+      "image": "/images/food/rice.svg"
+    },
+    {
+      "index": 4,
+      "folderName": "boiled egg",
+      "id": "food-boiled-egg",
+      "name": "Boiled Egg (2 pcs)",
+      "regionalName": "அவித்த முட்டை",
+      "category": "breakfast",
+      "estimatedKcal": "140–160 kcal",
+      "image": "/images/food/egg.svg"
+    },
+    {
+      "index": 5,
+      "folderName": "burger",
+      "id": "food-burger",
+      "name": "Veggie / Chicken Burger",
+      "regionalName": "பர்கர்",
+      "category": "snacks",
+      "estimatedKcal": "280–360 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 6,
+      "folderName": "carrot poriyal",
+      "id": "food-carrot-poriyal",
+      "name": "Carrot Poriyal",
+      "regionalName": "கேரட் பொரியல்",
+      "category": "lunch",
+      "estimatedKcal": "55–80 kcal",
+      "image": "/images/food/curry.svg"
+    },
+    {
+      "index": 7,
+      "folderName": "channa masala",
+      "id": "food-channa-masala",
+      "name": "Channa Masala Curry",
+      "regionalName": "கொண்டைக்கடலை மசாலா",
+      "category": "breakfast",
+      "estimatedKcal": "160–220 kcal",
+      "image": "/images/food/curry.svg"
+    },
+    {
+      "index": 8,
+      "folderName": "chappathi",
+      "id": "food-chapati",
+      "name": "Whole Wheat Chapati (2 pcs)",
+      "regionalName": "சப்பாத்தி / ಚಪಾತಿ",
+      "category": "dinner",
+      "estimatedKcal": "140–190 kcal",
+      "image": "/images/food/chapati.svg"
+    },
+    {
+      "index": 9,
+      "folderName": "dosa",
+      "id": "food-plain-dosa",
+      "name": "Crispy Dosa with Chutney",
+      "regionalName": "தோசை / ದೋಸೆ",
+      "category": "breakfast",
+      "estimatedKcal": "180–240 kcal",
+      "image": "/images/food/dosa.svg"
+    },
+    {
+      "index": 10,
+      "folderName": "fires",
+      "id": "food-french-fries",
+      "name": "Crispy French Fries",
+      "regionalName": "பிரெஞ்சு பிரைஸ்",
+      "category": "snacks",
+      "estimatedKcal": "220–310 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 11,
+      "folderName": "idly",
+      "id": "food-idli",
+      "name": "Idli (2 pcs) with Sambar & Chutney",
+      "regionalName": "இட்லி / ಇಡ್ಲಿ",
+      "category": "breakfast",
+      "estimatedKcal": "130–170 kcal",
+      "image": "/images/food/idli.svg"
+    },
+    {
+      "index": 12,
+      "folderName": "Jalebi",
+      "id": "food-jalebi",
+      "name": "Crispy Hot Jalebi",
+      "regionalName": "ஜிலேபி / ಜಲೇಬಿ",
+      "category": "snacks",
+      "estimatedKcal": "150–230 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 13,
+      "folderName": "koozh",
+      "id": "food-koozh",
+      "name": "Ragi Keppai Koozh",
+      "regionalName": "கேழ்வரகு கூழ்",
+      "category": "breakfast",
+      "estimatedKcal": "120–160 kcal",
+      "image": "/images/food/porridge.svg"
+    },
+    {
+      "index": 14,
+      "folderName": "medu vada",
+      "id": "food-vada",
+      "name": "Medu Vada (1 pc)",
+      "regionalName": "மெது வடை / ಉದ್ದಿನ ವಡೆ",
+      "category": "breakfast",
+      "estimatedKcal": "140–180 kcal",
+      "image": "/images/food/vada.svg"
+    },
+    {
+      "index": 15,
+      "folderName": "murukku",
+      "id": "food-murukku",
+      "name": "Crispy South Indian Murukku",
+      "regionalName": "முறுக்கு / ಮುರುಕು",
+      "category": "snacks",
+      "estimatedKcal": "150–210 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 16,
+      "folderName": "mysore pak",
+      "id": "food-mysore-pak",
+      "name": "Pure Ghee Mysore Pak",
+      "regionalName": "மைசூர் பாக்",
+      "category": "snacks",
+      "estimatedKcal": "180–260 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 17,
+      "folderName": "noodles",
+      "id": "food-noodles",
+      "name": "Veg Hakka Noodles",
+      "regionalName": "வெஜ் நூடுல்ஸ்",
+      "category": "dinner",
+      "estimatedKcal": "260–340 kcal",
+      "image": "/images/food/noodles.svg"
+    },
+    {
+      "index": 18,
+      "folderName": "panneer masal",
+      "id": "food-paneer-curry",
+      "name": "Paneer Butter Masala",
+      "regionalName": "பனீர் மசாலா / ಪನೀರ್ ಮಸಾಲ",
+      "category": "dinner",
+      "estimatedKcal": "240–320 kcal",
+      "image": "/images/food/curry.svg"
+    },
+    {
+      "index": 19,
+      "folderName": "parupu vadai",
+      "id": "food-paruppu-vadai",
+      "name": "Crispy Paruppu Vadai (Chana Dal)",
+      "regionalName": "பருப்பு வடை",
+      "category": "breakfast",
+      "estimatedKcal": "130–170 kcal",
+      "image": "/images/food/vada.svg"
+    },
+    {
+      "index": 20,
+      "folderName": "pizza",
+      "id": "food-pizza",
+      "name": "Veggie Delight Pizza",
+      "regionalName": "வெஜ் பீட்சா",
+      "category": "snacks",
+      "estimatedKcal": "210–290 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 21,
+      "folderName": "poori",
+      "id": "food-poori",
+      "name": "Poori with Potato Masala (2 pcs)",
+      "regionalName": "பூரி மசாலா / ಪೂರಿ",
+      "category": "breakfast",
+      "estimatedKcal": "240–320 kcal",
+      "image": "/images/food/poori.svg"
+    },
+    {
+      "index": 22,
+      "folderName": "puthina chutney",
+      "id": "food-puthina-chutney",
+      "name": "Fresh Mint Puthina Chutney",
+      "regionalName": "புதினா சட்னி",
+      "category": "breakfast",
+      "estimatedKcal": "30–50 kcal",
+      "image": "/images/food/chutney.svg"
+    },
+    {
+      "index": 23,
+      "folderName": "sadham",
+      "id": "food-rice",
+      "name": "Steamed White Rice (Sadham)",
+      "regionalName": "சாதம் / ಅನ್ನ",
+      "category": "lunch",
+      "estimatedKcal": "160–210 kcal",
+      "image": "/images/food/rice.svg"
+    },
+    {
+      "index": 24,
+      "folderName": "sambar",
+      "id": "food-sambar",
+      "name": "South Indian Sambar",
+      "regionalName": "சாம்பார் / ಸಾಂಬಾರ್",
+      "category": "breakfast",
+      "estimatedKcal": "60–95 kcal",
+      "image": "/images/food/curry.svg"
+    },
+    {
+      "index": 25,
+      "folderName": "sambar sadham",
+      "id": "food-sambar-rice",
+      "name": "Sambar Rice (Bisibelebath style)",
+      "regionalName": "சாம்பார் சாதம்",
+      "category": "lunch",
+      "estimatedKcal": "220–290 kcal",
+      "image": "/images/food/rice.svg"
+    },
+    {
+      "index": 26,
+      "folderName": "samosa",
+      "id": "food-samosa",
+      "name": "Crispy Punjabi / Aloo Samosa (2 pcs)",
+      "regionalName": "சமோசா / ಸಮೋಸ",
+      "category": "snacks",
+      "estimatedKcal": "180–260 kcal",
+      "image": "/images/food/snack.svg"
+    },
+    {
+      "index": 27,
+      "folderName": "ven pongal",
+      "id": "food-pongal",
+      "name": "Ghee Ven Pongal with Cashews",
+      "regionalName": "வெண் பொங்கல் / ಪೊಂಗಲ್",
+      "category": "breakfast",
+      "estimatedKcal": "230–310 kcal",
+      "image": "/images/food/pongal.svg"
+    }
+  ]
+}

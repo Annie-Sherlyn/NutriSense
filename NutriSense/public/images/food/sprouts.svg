@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="100%" height="100%">
+  <circle cx="80" cy="80" r="70" fill="#F4EDE2" stroke="#E2D4C3" stroke-width="2"/>
+  <!-- Bowl -->
+  <ellipse cx="80" cy="95" rx="55" ry="38" fill="#FFFFFF" stroke="#D5C5B2" stroke-width="2"/>
+  <!-- Green sprouts bed -->
+  <ellipse cx="80" cy="85" rx="46" ry="24" fill="#2F9E8F" opacity="0.25"/>
+  <!-- Sprout tails & grains -->
+  <circle cx="65" cy="78" r="4.5" fill="#42B870"/>
+  <path d="M 67 76 Q 74 68 76 72" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <circle cx="82" cy="74" r="4.5" fill="#2E9E5B"/>
+  <path d="M 84 72 Q 92 64 96 68" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <circle cx="95" cy="82" r="4.5" fill="#42B870"/>
+  <path d="M 97 80 Q 106 75 104 80" stroke="#FFFFFF" stroke-width="2" fill="none"/>
+  <circle cx="70" cy="90" r="4" fill="#2E9E5B"/>
+  <circle cx="88" cy="92" r="4" fill="#42B870"/>
+  <!-- Tomato & onion dice -->
+  <rect x="58" y="82" width="6" height="6" rx="1.5" fill="#E2582E"/>
+  <rect x="76" y="88" width="6" height="6" rx="1.5" fill="#E2582E"/>
+  <rect x="92" y="86" width="5" height="5" rx="1" fill="#DCD1F7"/>
+  <!-- Lemon wedge -->
+  <path d="M 44 65 C 44 50 62 46 68 56 Z" fill="#F2B33D"/>
+  <path d="M 47 62 C 48 54 59 50 64 57 Z" fill="#FFF275"/>
+</svg>
