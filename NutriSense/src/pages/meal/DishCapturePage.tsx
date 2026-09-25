@@ -69,7 +69,12 @@ export const DishCapturePage: React.FC = () => {
         // storage quota fallback
       }
       canvas.toBlob((blob) => {
-        if (blob) processFile(new File([blob], 'camera-dish.jpg', { type: 'image/jpeg' }), dataUrl);
+        if (blob) {
+          console.log(`[Camera Capture] Blob created: size=${blob.size} bytes, type=${blob.type}`);
+          processFile(new File([blob], 'camera-dish.jpg', { type: 'image/jpeg' }), dataUrl);
+        } else {
+          console.error('[Camera Capture] toBlob returned null');
+        }
       }, 'image/jpeg', 0.85);
     }
   };
