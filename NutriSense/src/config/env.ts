@@ -5,7 +5,7 @@ export const ENV = {
   FIREBASE_STORAGE_BUCKET: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '',
   FIREBASE_MESSAGING_SENDER_ID: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '',
   FIREBASE_APP_ID: import.meta.env.VITE_FIREBASE_APP_ID || '',
-  USE_MOCK_API: import.meta.env.VITE_USE_MOCK_API !== 'false',
+  USE_MOCK_API: String(import.meta.env.VITE_USE_MOCK_API).toLowerCase().trim() !== 'false',
   API_BASE_URL: import.meta.env.VITE_API_BASE_URL || '/api',
 };
 

@@ -28,21 +28,14 @@ export const PhotoResultPage: React.FC = () => {
     '';
 
   const isMultiItem = Boolean(state?.isMultiItem || (state?.detectedItems && state.detectedItems.length > 1));
-  const detectedItems: DetectedPlateItem[] = state?.detectedItems || [
-    {
-      id: 'food-idli',
-      name: 'Idli (2 pcs) with Sambar & Chutney',
-      regionalName: 'இட்லி / இட்லி சாம்பார்',
-      confidence: 0.92,
-      image: '/images/food/idli.svg',
-      estimatedKcal: '180–220 kcal',
-      platePosition: 'Center',
-      color: '#2ECC71',
-      box: [0.1, 0.1, 0.8, 0.8],
-    },
-  ];
-
+  const detectedItems: DetectedPlateItem[] = state?.detectedItems || [];
   const candidates: FoodCandidate[] = state?.candidates || detectedItems;
+  
+  // If no state or predictions are available (e.g., navigated directly), redirect back
+  if (!state || candidates.length === 0) {
+    return <div className="p-8 text-center text-red-500">No analysis result found. Please <a href="/log/photo" className="underline">retake photo</a>.</div>;
+  }
+
   const topPrediction = candidates[0] || detectedItems[0];
   const isLowConfidence = topPrediction.confidence < 0.50;
   const [selectedCandidateId, setSelectedCandidateId] = useState(topPrediction.id);
