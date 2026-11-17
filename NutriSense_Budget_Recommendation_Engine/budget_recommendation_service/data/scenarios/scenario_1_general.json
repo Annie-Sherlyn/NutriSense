@@ -1,0 +1,19 @@
+{
+  "mode": "general",
+  "budget": 100,
+  "meal_type": "snack",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "protein_g": 20,
+    "iron_mg": 5,
+    "fiber_g": 8,
+    "calcium_mg": 300,
+    "vitamin_b12_mcg": 1.0
+  },
+  "priority_nutrients": [
+    "iron_mg",
+    "protein_g"
+  ],
+  "menu": null
+}

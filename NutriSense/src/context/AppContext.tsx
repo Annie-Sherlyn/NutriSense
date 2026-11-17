@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
 import { TOKENS } from '../config/tokens';
 import { nutritionService } from '../services/nutrition.service';
+import { profileService } from '../services/profile.service';
 import type { UserProfile, DailyNutritionSummary } from '../types';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
@@ -16,7 +17,7 @@ interface AppSettings {
 
 interface AppContextType {
   profile: UserProfile | null;
-  updateProfile: (updates: Partial<UserProfile>) => void;
+  updateProfile: (updates: Partial<UserProfile>) => Promise<void>;
   settings: AppSettings;
   updateSettings: (updates: Partial<AppSettings>) => void;
   todaySummary: DailyNutritionSummary | null;
@@ -41,7 +42,7 @@ const DEFAULT_PROFILE: UserProfile = {
   goal: 'better-health',
   priorityNutrients: ['protein', 'iron', 'calcium'],
   budgetPerMeal: 150,
-  ageGroup: '25–34',
+  ageGroup: '25-34',
   activityLevel: 'moderate',
   location: 'Bengaluru, India',
   cuisineLikes: ['South Indian', 'Pan-Indian'],
@@ -62,15 +63,19 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // 1. Profile State
-  const [profile, setProfile] = useState<UserProfile | null>(() => {
-    const raw = localStorage.getItem(TOKENS.storageKeys.profile);
-    if (!raw) return DEFAULT_PROFILE;
-    try {
-      return JSON.parse(raw);
-    } catch {
-      return DEFAULT_PROFILE;
-    }
-  });
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    import('../lib/firebase').then(({ initializeAuth }) => {
+      initializeAuth().then(() => {
+        profileService.getProfile().then((p) => {
+          setProfile(p || { ...DEFAULT_PROFILE, userId: profileService.getStableUserId() });
+        });
+      }).catch(err => {
+        console.error("Firebase auth init failed", err);
+      });
+    });
+  }, []);
 
   // 2. Settings State
   const [settings, setSettings] = useState<AppSettings>(() => {
@@ -127,16 +132,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [settings]);
 
   // Update Profile
-  const updateProfile = (updates: Partial<UserProfile>) => {
-    setProfile((prev) => {
-      const updated = {
-        ...(prev || DEFAULT_PROFILE),
-        ...updates,
-        updatedAt: new Date().toISOString(),
-      };
-      localStorage.setItem(TOKENS.storageKeys.profile, JSON.stringify(updated));
-      return updated;
-    });
+  const updateProfile = async (updates: Partial<UserProfile>) => {
+    const prev = profile || { ...DEFAULT_PROFILE, userId: profileService.getStableUserId() };
+    const updated = {
+      ...prev,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    };
+    
+    // Optimistic update
+    setProfile(updated);
+    
+    try {
+      await profileService.upsertProfile(updated);
+    } catch (err) {
+      console.error('Failed to persist profile updates to Supabase', err);
+      // Revert on failure could be implemented here
+    }
   };
 
   // Update Settings

@@ -1,0 +1,46 @@
+{
+  "mode": "menu",
+  "budget": 100,
+  "meal_type": "breakfast",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "protein_g": 20,
+    "iron_mg": 5,
+    "fiber_g": 8,
+    "calcium_mg": 300
+  },
+  "priority_nutrients": [
+    "protein_g",
+    "iron_mg"
+  ],
+  "menu": {
+    "restaurant": "Madras Tiffin Center",
+    "items": [
+      {
+        "dish_name": "Plain Dosa",
+        "food_id": "dosa",
+        "price": 75,
+        "confidence": 0.96
+      },
+      {
+        "dish_name": "Idly",
+        "food_id": "idly",
+        "price": 55,
+        "confidence": 0.94
+      },
+      {
+        "dish_name": "Ven Pongal",
+        "food_id": "ven_pongal",
+        "price": 90,
+        "confidence": 0.93
+      },
+      {
+        "dish_name": "Poori Masala",
+        "food_id": "poori",
+        "price": 120,
+        "confidence": 0.95
+      }
+    ]
+  }
+}

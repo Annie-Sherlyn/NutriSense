@@ -15,7 +15,8 @@ import { Modal } from '../../components/common/Modal';
 import { NutriMote } from '../../components/animations/NutriMote';
 import { InteractiveNutrientEcosystem } from '../../components/nutrition/InteractiveNutrientEcosystem';
 import { useApp } from '../../context/AppContext';
-import type { NutrientGap, MealType } from '../../types';
+import { dashboardService } from '../../services/dashboard.service';
+import type { NutrientGap, MealType, DailyNutritionSummary } from '../../types';
 
 const DID_YOU_KNOW_TIPS = [
   'Did you know? Pairing plant iron (like chana or spinach) with lemon increases iron absorption up to 3x.',
@@ -28,15 +29,33 @@ const DID_YOU_KNOW_TIPS = [
 export const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const {
-    todaySummary,
     profile,
     projectedGaps,
     streakCount,
     setStreakModalOpen,
   } = useApp();
 
+  const [todaySummary, setTodaySummary] = useState<DailyNutritionSummary | null>(null);
   const [selectedGapForModal, setSelectedGapForModal] = useState<NutrientGap | null>(null);
   const [tipIndex, setTipIndex] = useState(0);
+
+  useEffect(() => {
+    dashboardService.getTodaySummary()
+      .then(setTodaySummary)
+      .catch((err) => {
+        console.error('Dashboard summary error:', err);
+        // Always resolve to zero-state — never leave ecosystem in perpetual loading
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        setTodaySummary({
+          date: today.toISOString(),
+          consumed: { calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0, iron: 0, calcium: 0, b12: 0, vitaminD: 0 },
+          targets: { calories: { target: 2000, unit: 'kcal' }, protein: { target: 65, unit: 'g' }, carbs: { target: 230, unit: 'g' }, fat: { target: 55, unit: 'g' }, fiber: { target: 30, unit: 'g' }, iron: { target: 17, unit: 'mg' }, calcium: { target: 1000, unit: 'mg' }, b12: { target: 2.2, unit: 'mcg' }, vitaminD: { target: 15, unit: 'mcg' } },
+          meals: [],
+          gaps: [],
+        });
+      });
+  }, []);
 
   // Rotate tip every 15s
   useEffect(() => {
@@ -268,7 +287,15 @@ export const DashboardPage: React.FC = () => {
             onNutrientClick={(gap) => setSelectedGapForModal(gap)}
           />
         ) : (
-          <div className="py-20 text-center text-xs text-ink-muted-light">Loading ecosystem…</div>
+          <div className="py-20 text-center flex flex-col items-center gap-3">
+            <p className="text-sm font-semibold text-ink-muted-light dark:text-ink-muted-dark">Log your first meal to see your nutrient breakdown</p>
+            <button
+              onClick={() => navigate('/log')}
+              className="text-xs font-bold text-brand-light dark:text-brand-dark underline"
+            >
+              Log a meal →
+            </button>
+          </div>
         )}
       </Card>
 

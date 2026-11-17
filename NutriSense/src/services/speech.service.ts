@@ -1,6 +1,7 @@
 import { ENV } from '../config/env';
 import { request } from './api';
 import { delay, checkSimulatedError } from '../utils/delay';
+import { supabaseFoodService } from './supabase/food.service';
 import type { SpeechResult } from '../types';
 
 export const speechService = {
@@ -47,52 +48,81 @@ export const speechService = {
   },
 
   // Parse typed text into food candidate items (for manual speech fallback)
-  parseTypedText(text: string): SpeechResult {
+  async parseTypedText(text: string): Promise<SpeechResult> {
+    checkSimulatedError();
+
+    if (!ENV.USE_MOCK_API) {
+      const response = await request<any>('/speech/text', {
+        method: 'POST',
+        body: JSON.stringify({ text }),
+      });
+      // Map to SpeechResult shape
+      if (response.parsed_items) {
+        return {
+          transcript: response.transcript,
+          confidence: 0.95,
+          extractedItems: response.parsed_items.map((item: any) => ({
+            name: item.raw_label,
+            quantity: item.quantity,
+            unit: item.unit,
+            matchedFoodId: item.resolved_food_id,
+          })),
+        };
+      }
+      return response;
+    }
+
     const lower = text.toLowerCase();
     const items: SpeechResult['extractedItems'] = [];
 
-    if (lower.includes('idli') || lower.includes('idly')) {
+    // 1. Resolve directly from connected foods database & dataset
+    const matched = await supabaseFoodService.resolveByLabel(text);
+    if (matched) {
       items.push({
-        name: 'Idli (2 pcs) with Sambar & Chutney',
+        name: matched.name,
         quantity: lower.includes('two') || lower.includes('2') ? 2 : 1,
-        unit: 'pcs',
-        matchedFoodId: 'food-idli',
+        unit: matched.servingDescription || 'serving',
+        matchedFoodId: matched.id,
       });
+    } else {
+      // Check individual words/clauses against database
+      const parts = text.split(/,|and|\+/i).map((p) => p.trim()).filter(Boolean);
+      for (const part of parts) {
+        const food = await supabaseFoodService.resolveByLabel(part);
+        if (food && !items.some((it) => it.matchedFoodId === food.id)) {
+          items.push({
+            name: food.name,
+            quantity: 1,
+            unit: food.servingDescription || 'serving',
+            matchedFoodId: food.id,
+          });
+        }
+      }
     }
-    if (lower.includes('vada') || lower.includes('wada')) {
-      items.push({
-        name: 'Medu Vada (1 pc)',
-        quantity: 1,
-        unit: 'pc',
-        matchedFoodId: 'food-vada',
-      });
-    }
-    if (lower.includes('coffee') || lower.includes('kaapi')) {
-      items.push({
-        name: 'Traditional Filter Coffee',
-        quantity: 1,
-        unit: 'cup',
-        matchedFoodId: 'food-filter-coffee',
-      });
-    }
-    if (lower.includes('dosa') || lower.includes('dose')) {
-      items.push({
-        name: 'Masala Dosa',
-        quantity: 1,
-        unit: 'plate',
-        matchedFoodId: 'food-masala-dosa',
-      });
+
+    if (items.length === 0) {
+      // Try searching for partial match in dataset
+      const searchRes = await supabaseFoodService.searchFoods(text);
+      if (searchRes.length > 0) {
+        const top = searchRes[0];
+        items.push({
+          name: top.name,
+          quantity: 1,
+          unit: top.servingDescription || 'serving',
+          matchedFoodId: top.id,
+        });
+      }
     }
 
     return {
       transcript: text,
-      confidence: 0.88,
+      confidence: items.length > 0 ? 0.95 : 0.75,
       extractedItems: items.length > 0 ? items : [
         {
           name: text.trim() || 'Custom dish',
           quantity: 1,
           unit: 'serving',
-          matchedFoodId: 'food-idli',
+          matchedFoodId: undefined,
         },
       ],
     };

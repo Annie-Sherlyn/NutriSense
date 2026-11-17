@@ -1,0 +1,14 @@
+{
+  "mode": "general",
+  "budget": 100,
+  "meal_type": "lunch",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "protein_g": 0,
+    "iron_mg": 0,
+    "fiber_g": 0
+  },
+  "priority_nutrients": [],
+  "menu": null
+}

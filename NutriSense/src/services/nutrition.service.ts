@@ -1,9 +1,11 @@
-import { ENV } from '../config/env';
+import { supabaseMealService } from './supabase/meal.service';import { ENV } from '../config/env';
 import { request } from './api';
+
 import { INITIAL_MOCK_MEALS } from '../mocks/meals';
 import { DEFAULT_DAILY_TARGETS, MOCK_WEEKLY_SUMMARY } from '../mocks/nutrition';
 import { TOKENS } from '../config/tokens';
 import { delay, checkSimulatedError } from '../utils/delay';
+
 import type {
   Meal,
   MacroNutrients,
@@ -19,13 +21,16 @@ import type {
 function getStoredMeals(): Meal[] {
   const raw = localStorage.getItem(TOKENS.storageKeys.meals);
   if (!raw) {
-    localStorage.setItem(TOKENS.storageKeys.meals, JSON.stringify(INITIAL_MOCK_MEALS));
-    return INITIAL_MOCK_MEALS;
+    if (ENV.USE_MOCK_API) {
+      localStorage.setItem(TOKENS.storageKeys.meals, JSON.stringify(INITIAL_MOCK_MEALS));
+      return INITIAL_MOCK_MEALS;
+    }
+    return [];
   }
   try {
     return JSON.parse(raw);
   } catch {
-    return INITIAL_MOCK_MEALS;
+    return [];
   }
 }
 
@@ -131,47 +136,50 @@ export const nutritionService = {
 
   // Save / Log a new meal
   async logMeal(mealData: Omit<Meal, 'id'>): Promise<Meal> {
-    checkSimulatedError();
-
+    let savedMeal: Meal;
     if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect meal logging endpoint (e.g. POST /meals)
-      return request<Meal>('/meals', {
-        method: 'POST',
-        body: JSON.stringify(mealData),
-      });
+      try {
+        savedMeal = await supabaseMealService.saveMeal(mealData);
+      } catch (err) {
+        console.warn('Supabase meal persistence failed, saving locally:', err);
+        savedMeal = {
+          ...mealData,
+          id: `meal-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+        };
+      }
+    } else {
+      await delay(200, 500);
+      savedMeal = {
+        ...mealData,
+        id: `meal-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      };
     }
-
-    await delay(400, 800);
-
-    const newMeal: Meal = {
-      ...mealData,
-      id: `meal-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-    };
 
     const currentMeals = getStoredMeals();
-    const updated = [newMeal, ...currentMeals];
-    saveStoredMeals(updated);
-
-    return newMeal;
+    saveStoredMeals([savedMeal, ...currentMeals]);
+    return savedMeal;
   },
 
-  // Get today's meals
+  // Get today's meals directly from Supabase
   async getTodayMeals(): Promise<Meal[]> {
-    checkSimulatedError();
-
     if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect today's meals endpoint (e.g. GET /meals/today)
-      return request<Meal[]>('/meals/today');
+      try {
+        const supaMeals = await supabaseMealService.getTodayMeals();
+        if (supaMeals && supaMeals.length > 0) {
+          return supaMeals;
+        }
+      } catch (e) {
+        console.warn('Failed to load today meals from Supabase, checking local cache:', e);
+      }
     }
 
-    await delay(200, 450);
     return getStoredMeals();
   },
 
   // Update existing meal (portion or item changes)
   async updateMeal(updatedMeal: Meal): Promise<Meal> {
     checkSimulatedError();
-    await delay(300, 600);
+    await delay(200, 400);
 
     const meals = getStoredMeals();
     const index = meals.findIndex((m) => m.id === updatedMeal.id);
@@ -185,20 +193,30 @@ export const nutritionService = {
   // Delete logged meal
   async deleteMeal(mealId: string): Promise<void> {
     checkSimulatedError();
-    await delay(250, 500);
+    await delay(150, 300);
 
     const meals = getStoredMeals();
     const filtered = meals.filter((m) => m.id !== mealId);
     saveStoredMeals(filtered);
   },
 
-  // Calculate daily nutrition summary and nutrient gaps
+  // Calculate daily nutrition summary and nutrient gaps directly from Supabase
   async getDailySummary(): Promise<DailyNutritionSummary> {
-    checkSimulatedError();
-
     if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect daily summary endpoint (e.g. GET /nutrition/daily-summary)
-      return request<DailyNutritionSummary>('/nutrition/daily-summary');
+      try {
+        const { dashboardService } = await import('./dashboard.service');
+        const summary = await dashboardService.getTodaySummary();
+        const supaMeals = await supabaseMealService.getTodayMeals();
+        const localMeals = getStoredMeals();
+        const activeMeals = supaMeals.length > 0 ? supaMeals : localMeals;
+
+        return {
+          ...summary,
+          meals: activeMeals,
+        };
+      } catch (err) {
+        console.warn('Failed to compute daily summary from Supabase, using local fallback:', err);
+      }
     }
 
     await delay(250, 500);
@@ -318,3 +336,5 @@ export const nutritionService = {
     saveStoredMeals(INITIAL_MOCK_MEALS);
   },
 };
+
+

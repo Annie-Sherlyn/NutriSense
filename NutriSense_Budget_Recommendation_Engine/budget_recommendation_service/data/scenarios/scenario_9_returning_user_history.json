@@ -1,0 +1,16 @@
+{
+  "mode": "general",
+  "user_id": "user_returning_01",
+  "budget": 75,
+  "meal_type": "breakfast",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "carbs_g": 30,
+    "protein_g": 4
+  },
+  "priority_nutrients": [
+    "carbs_g"
+  ],
+  "menu": null
+}

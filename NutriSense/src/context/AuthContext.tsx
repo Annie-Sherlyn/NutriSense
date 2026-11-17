@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authService } from '../services/auth.service';
 import { isFirebaseConfigured } from '../config/env';
+import { initializeAuth } from '../lib/firebase';
 import type { User } from '../types';
 
 interface AuthContextType {
@@ -23,40 +24,74 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = authService.onAuthStateChanged((u) => {
-      setUser(u);
-      setLoading(false);
-    });
-
-    return () => unsubscribe();
+    // 1. First, forcefully guarantee anonymous auth as per requirements
+    initializeAuth()
+      .then((fUser) => {
+        const appUser: User = {
+          id: fUser.uid,
+          email: 'anonymous@nutrisense.app',
+          displayName: 'Anonymous User',
+          isAnonymous: true,
+          isOnboarded: Boolean(localStorage.getItem('ns_profile')),
+          createdAt: new Date().toISOString(),
+        };
+        setUser(appUser);
+        setLoading(false);
+        // Persist/touch into Supabase profiles
+        import('../services/profile.service').then(({ profileService }) => {
+          profileService.upsertProfile({ name: 'Anonymous User' });
+        });
+      })
+      .catch((err) => {
+        console.warn('Anonymous auth failed, falling back to Demo User', err);
+        // Fallback to Demo User so the login screen is NEVER shown
+        authService.loginAsDemo().then((demoUser) => {
+          setUser(demoUser);
+          setLoading(false);
+          import('../services/profile.service').then(({ profileService }) => {
+            profileService.upsertProfile({ name: demoUser.displayName || 'Demo User' });
+          });
+        });
+      });
   }, []);
 
   const refreshUser = async () => {
-    const current = await authService.getCurrentUser();
-    setUser(current);
+    // No-op for now to preserve anonymous state
   };
 
   const login = async (email: string, pass: string) => {
     const logged = await authService.login(email, pass);
     setUser(logged);
+    import('../services/profile.service').then(({ profileService }) => {
+      profileService.upsertProfile({ name: logged.displayName || 'NutriSense User' });
+    });
     return logged;
   };
 
   const register = async (email: string, pass: string, name: string) => {
     const registered = await authService.register(email, pass, name);
     setUser(registered);
+    import('../services/profile.service').then(({ profileService }) => {
+      profileService.upsertProfile({ name: name || registered.displayName || 'NutriSense User' });
+    });
     return registered;
   };
 
   const loginWithGoogle = async () => {
     const logged = await authService.loginWithGoogle();
     setUser(logged);
+    import('../services/profile.service').then(({ profileService }) => {
+      profileService.upsertProfile({ name: logged.displayName || 'Google User' });
+    });
     return logged;
   };
 
   const loginAsDemo = async () => {
     const demo = await authService.loginAsDemo();
     setUser(demo);
+    import('../services/profile.service').then(({ profileService }) => {
+      profileService.upsertProfile({ name: demo.displayName || 'Demo User' });
+    });
     return demo;
   };
 

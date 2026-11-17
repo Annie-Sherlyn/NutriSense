@@ -1,0 +1,537 @@
+{
+  "description": "TEST / MOCK DATA — NOT PRODUCTION NUTRITION VALUES. Used for testing the Budget-Aware Nutrient Recommendation Engine.",
+  "foods": [
+    {
+      "food_id": "channa_masala",
+      "display_name": "Channa Masala",
+      "serving": "1 bowl",
+      "nutrition": {
+        "calories": 240,
+        "protein_g": 12.0,
+        "carbs_g": 32.0,
+        "fat_g": 7.0,
+        "fiber_g": 8.0,
+        "iron_mg": 4.5,
+        "calcium_mg": 80,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner", "breakfast"],
+      "combination_group": "meal_side"
+    },
+    {
+      "food_id": "dosa",
+      "display_name": "Dosa",
+      "serving": "1 plain dosa",
+      "nutrition": {
+        "calories": 160,
+        "protein_g": 4.0,
+        "carbs_g": 28.0,
+        "fat_g": 3.5,
+        "fiber_g": 2.0,
+        "iron_mg": 1.2,
+        "calcium_mg": 25,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["breakfast", "dinner"],
+      "combination_group": "breakfast_base"
+    },
+    {
+      "food_id": "idly",
+      "display_name": "Idly",
+      "serving": "2 pieces",
+      "nutrition": {
+        "calories": 150,
+        "protein_g": 5.0,
+        "carbs_g": 30.0,
+        "fat_g": 1.0,
+        "fiber_g": 2.5,
+        "iron_mg": 1.4,
+        "calcium_mg": 30,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["breakfast", "dinner"],
+      "combination_group": "breakfast_base"
+    },
+    {
+      "food_id": "poori",
+      "display_name": "Poori",
+      "serving": "3 pieces with masala",
+      "nutrition": {
+        "calories": 320,
+        "protein_g": 6.5,
+        "carbs_g": 42.0,
+        "fat_g": 14.0,
+        "fiber_g": 3.0,
+        "iron_mg": 2.0,
+        "calcium_mg": 35,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["breakfast", "lunch"],
+      "combination_group": "breakfast_base"
+    },
+    {
+      "food_id": "ven_pongal",
+      "display_name": "Ven Pongal",
+      "serving": "1 serving",
+      "nutrition": {
+        "calories": 280,
+        "protein_g": 7.0,
+        "carbs_g": 38.0,
+        "fat_g": 11.0,
+        "fiber_g": 3.5,
+        "iron_mg": 2.2,
+        "calcium_mg": 45,
+        "vitamin_b12_mcg": 0.1
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["dairy", "nuts"],
+      "meal_tags": ["breakfast"],
+      "combination_group": "breakfast_base"
+    },
+    {
+      "food_id": "medu_vada",
+      "display_name": "Medu Vada",
+      "serving": "1 piece",
+      "nutrition": {
+        "calories": 160,
+        "protein_g": 4.5,
+        "carbs_g": 16.0,
+        "fat_g": 9.0,
+        "fiber_g": 2.8,
+        "iron_mg": 1.5,
+        "calcium_mg": 30,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["breakfast", "snack"],
+      "combination_group": "breakfast_side"
+    },
+    {
+      "food_id": "koozh",
+      "display_name": "Koozh",
+      "serving": "250 ml",
+      "nutrition": {
+        "calories": 140,
+        "protein_g": 4.0,
+        "carbs_g": 26.0,
+        "fat_g": 1.5,
+        "fiber_g": 5.0,
+        "iron_mg": 3.8,
+        "calcium_mg": 180,
+        "vitamin_b12_mcg": 0.2
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["dairy"],
+      "meal_tags": ["breakfast", "snack"],
+      "combination_group": "standalone"
+    },
+    {
+      "food_id": "parupu_vadai",
+      "display_name": "Parupu Vadai",
+      "serving": "1 piece",
+      "nutrition": {
+        "calories": 150,
+        "protein_g": 5.0,
+        "carbs_g": 18.0,
+        "fat_g": 7.0,
+        "fiber_g": 3.2,
+        "iron_mg": 2.5,
+        "calcium_mg": 35,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["snack", "breakfast"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "boiled_egg",
+      "display_name": "Boiled Egg",
+      "serving": "1 egg",
+      "nutrition": {
+        "calories": 78,
+        "protein_g": 6.3,
+        "carbs_g": 0.6,
+        "fat_g": 5.3,
+        "fiber_g": 0.0,
+        "iron_mg": 0.9,
+        "calcium_mg": 28,
+        "vitamin_b12_mcg": 0.6
+      },
+      "diet_tags": ["eggetarian", "non_vegetarian"],
+      "allergen_tags": ["egg"],
+      "meal_tags": ["breakfast", "snack", "lunch"],
+      "combination_group": "standalone"
+    },
+    {
+      "food_id": "puthina_chutney",
+      "display_name": "Puthina Chutney",
+      "serving": "1 side serving",
+      "nutrition": {
+        "calories": 40,
+        "protein_g": 1.0,
+        "carbs_g": 3.0,
+        "fat_g": 2.5,
+        "fiber_g": 1.8,
+        "iron_mg": 1.8,
+        "calcium_mg": 40,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["breakfast", "snack"],
+      "combination_group": "breakfast_side"
+    },
+    {
+      "food_id": "sambar",
+      "display_name": "Sambar",
+      "serving": "1 bowl",
+      "nutrition": {
+        "calories": 90,
+        "protein_g": 4.5,
+        "carbs_g": 14.0,
+        "fat_g": 2.0,
+        "fiber_g": 3.5,
+        "iron_mg": 1.6,
+        "calcium_mg": 50,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["breakfast", "lunch", "dinner"],
+      "combination_group": "meal_side"
+    },
+    {
+      "food_id": "biriyani",
+      "display_name": "Biriyani",
+      "serving": "1 serving",
+      "nutrition": {
+        "calories": 450,
+        "protein_g": 18.0,
+        "carbs_g": 55.0,
+        "fat_g": 16.0,
+        "fiber_g": 3.0,
+        "iron_mg": 2.5,
+        "calcium_mg": 45,
+        "vitamin_b12_mcg": 0.8
+      },
+      "diet_tags": ["non_vegetarian"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "meal_base"
+    },
+    {
+      "food_id": "beetroot_poriyal",
+      "display_name": "Beetroot Poriyal",
+      "serving": "1 side serving",
+      "nutrition": {
+        "calories": 70,
+        "protein_g": 1.8,
+        "carbs_g": 11.0,
+        "fat_g": 2.2,
+        "fiber_g": 3.8,
+        "iron_mg": 1.9,
+        "calcium_mg": 35,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "meal_side"
+    },
+    {
+      "food_id": "carrot_poriyal",
+      "display_name": "Carrot Poriyal",
+      "serving": "1 side serving",
+      "nutrition": {
+        "calories": 65,
+        "protein_g": 1.5,
+        "carbs_g": 10.0,
+        "fat_g": 2.0,
+        "fiber_g": 3.2,
+        "iron_mg": 0.8,
+        "calcium_mg": 40,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "meal_side"
+    },
+    {
+      "food_id": "sambar_sadham",
+      "display_name": "Sambar Sadham",
+      "serving": "1 serving",
+      "nutrition": {
+        "calories": 310,
+        "protein_g": 8.0,
+        "carbs_g": 56.0,
+        "fat_g": 5.5,
+        "fiber_g": 4.5,
+        "iron_mg": 2.4,
+        "calcium_mg": 65,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "standalone"
+    },
+    {
+      "food_id": "sadham",
+      "display_name": "Sadham",
+      "serving": "1 serving plain rice",
+      "nutrition": {
+        "calories": 200,
+        "protein_g": 3.8,
+        "carbs_g": 44.0,
+        "fat_g": 0.5,
+        "fiber_g": 1.0,
+        "iron_mg": 0.5,
+        "calcium_mg": 15,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "meal_base"
+    },
+    {
+      "food_id": "paneer_masala",
+      "display_name": "Paneer Masala",
+      "serving": "1 bowl",
+      "nutrition": {
+        "calories": 320,
+        "protein_g": 15.0,
+        "carbs_g": 12.0,
+        "fat_g": 24.0,
+        "fiber_g": 2.5,
+        "iron_mg": 1.2,
+        "calcium_mg": 320,
+        "vitamin_b12_mcg": 1.1
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["dairy"],
+      "meal_tags": ["lunch", "dinner"],
+      "combination_group": "meal_side"
+    },
+    {
+      "food_id": "chappathi",
+      "display_name": "Chappathi",
+      "serving": "2 pieces with side dish",
+      "nutrition": {
+        "calories": 210,
+        "protein_g": 6.5,
+        "carbs_g": 36.0,
+        "fat_g": 4.0,
+        "fiber_g": 4.5,
+        "iron_mg": 2.1,
+        "calcium_mg": 40,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["dinner", "lunch"],
+      "combination_group": "meal_base"
+    },
+    {
+      "food_id": "noodles",
+      "display_name": "Noodles",
+      "serving": "1 veg serving",
+      "nutrition": {
+        "calories": 310,
+        "protein_g": 7.0,
+        "carbs_g": 48.0,
+        "fat_g": 10.0,
+        "fiber_g": 3.0,
+        "iron_mg": 1.5,
+        "calcium_mg": 30,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["dinner", "snack"],
+      "combination_group": "meal_base"
+    },
+    {
+      "food_id": "pizza",
+      "display_name": "Pizza",
+      "serving": "1 personal/small pizza",
+      "nutrition": {
+        "calories": 380,
+        "protein_g": 14.0,
+        "carbs_g": 45.0,
+        "fat_g": 16.0,
+        "fiber_g": 3.0,
+        "iron_mg": 1.8,
+        "calcium_mg": 210,
+        "vitamin_b12_mcg": 0.5
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten", "dairy"],
+      "meal_tags": ["snack", "dinner"],
+      "combination_group": "standalone"
+    },
+    {
+      "food_id": "samosa",
+      "display_name": "Samosa",
+      "serving": "1 piece",
+      "nutrition": {
+        "calories": 190,
+        "protein_g": 3.2,
+        "carbs_g": 22.0,
+        "fat_g": 10.5,
+        "fiber_g": 2.0,
+        "iron_mg": 1.0,
+        "calcium_mg": 20,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["snack"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "mysore_pak",
+      "display_name": "Mysore Pak",
+      "serving": "1 piece (40-50 g)",
+      "nutrition": {
+        "calories": 240,
+        "protein_g": 2.5,
+        "carbs_g": 28.0,
+        "fat_g": 14.0,
+        "fiber_g": 0.5,
+        "iron_mg": 0.6,
+        "calcium_mg": 25,
+        "vitamin_b12_mcg": 0.1
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["dairy"],
+      "meal_tags": ["snack"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "jalebi",
+      "display_name": "Jalebi",
+      "serving": "2 pieces",
+      "nutrition": {
+        "calories": 210,
+        "protein_g": 1.5,
+        "carbs_g": 38.0,
+        "fat_g": 7.0,
+        "fiber_g": 0.2,
+        "iron_mg": 0.4,
+        "calcium_mg": 15,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["snack"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "murukku",
+      "display_name": "Murukku",
+      "serving": "1 piece/small serving",
+      "nutrition": {
+        "calories": 160,
+        "protein_g": 2.8,
+        "carbs_g": 20.0,
+        "fat_g": 8.0,
+        "fiber_g": 1.5,
+        "iron_mg": 1.1,
+        "calcium_mg": 40,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["snack"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "burger",
+      "display_name": "Burger",
+      "serving": "1 veg burger",
+      "nutrition": {
+        "calories": 340,
+        "protein_g": 9.0,
+        "carbs_g": 42.0,
+        "fat_g": 15.0,
+        "fiber_g": 4.0,
+        "iron_mg": 1.8,
+        "calcium_mg": 70,
+        "vitamin_b12_mcg": 0.1
+      },
+      "diet_tags": ["vegetarian"],
+      "allergen_tags": ["gluten"],
+      "meal_tags": ["snack", "dinner"],
+      "combination_group": "standalone"
+    },
+    {
+      "food_id": "fries",
+      "display_name": "Fries",
+      "serving": "1 regular serving",
+      "nutrition": {
+        "calories": 280,
+        "protein_g": 3.0,
+        "carbs_g": 36.0,
+        "fat_g": 14.0,
+        "fiber_g": 3.2,
+        "iron_mg": 0.9,
+        "calcium_mg": 15,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["snack"],
+      "combination_group": "snack"
+    },
+    {
+      "food_id": "apple",
+      "display_name": "Apple",
+      "serving": "1 medium apple",
+      "nutrition": {
+        "calories": 80,
+        "protein_g": 0.5,
+        "carbs_g": 20.0,
+        "fat_g": 0.3,
+        "fiber_g": 4.0,
+        "iron_mg": 0.2,
+        "calcium_mg": 10,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["snack", "breakfast"],
+      "combination_group": "fruit"
+    },
+    {
+      "food_id": "banana",
+      "display_name": "Banana",
+      "serving": "1 medium banana",
+      "nutrition": {
+        "calories": 95,
+        "protein_g": 1.2,
+        "carbs_g": 24.0,
+        "fat_g": 0.3,
+        "fiber_g": 2.8,
+        "iron_mg": 0.3,
+        "calcium_mg": 8,
+        "vitamin_b12_mcg": 0.0
+      },
+      "diet_tags": ["vegetarian", "vegan"],
+      "allergen_tags": [],
+      "meal_tags": ["snack", "breakfast"],
+      "combination_group": "fruit"
+    }
+  ]
+}

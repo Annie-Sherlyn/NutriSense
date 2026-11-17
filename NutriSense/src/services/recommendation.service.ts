@@ -27,6 +27,15 @@ export const recommendationService = {
   // Get smart snacks with dynamic filter tags
   async getSmartSnacks(filterTag?: string): Promise<Recommendation[]> {
     checkSimulatedError();
+
+    if (!ENV.USE_MOCK_API) {
+      // In production: delegate to the same recommendations endpoint with a snack context
+      return request<Recommendation[]>('/recommendations', {
+        method: 'POST',
+        body: JSON.stringify({ eatingWindow: 'snack', filterTag }),
+      });
+    }
+
     await delay(200, 450);
 
     const snacks = MOCK_RECOMMENDATIONS.filter(

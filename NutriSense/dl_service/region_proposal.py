@@ -123,7 +123,16 @@ class RegionProposer:
         else:
             raise TypeError("Unsupported image format for RegionProposer")
 
+        # Resize image for much faster processing if it's too large
+        MAX_DIM = 640
         H, W = cv_img.shape[:2]
+        if max(H, W) > MAX_DIM:
+            scale = MAX_DIM / max(H, W)
+            new_W = int(W * scale)
+            new_H = int(H * scale)
+            cv_img = cv2.resize(cv_img, (new_W, new_H), interpolation=cv2.INTER_AREA)
+            H, W = new_H, new_W
+
         total_area = float(H * W)
         raw_boxes: List[List[float]] = []
         box_scores: List[float] = []

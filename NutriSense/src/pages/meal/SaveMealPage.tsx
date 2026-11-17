@@ -6,6 +6,7 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { FoodImage } from '../../components/food/FoodImage';
 import { nutritionService } from '../../services/nutrition.service';
+import { profileService } from '../../services/profile.service';
 import { useApp } from '../../context/AppContext';
 import type { MealType, Food, PortionSize, PreparationStyle, MacroNutrients, MicroNutrients } from '../../types';
 
@@ -54,7 +55,7 @@ export const SaveMealPage: React.FC = () => {
     setIsSaving(true);
     try {
       const newMeal = await nutritionService.logMeal({
-        userId: 'demo-user-1',
+        userId: profileService.getStableUserId(),
         mealType,
         loggedAt: new Date().toISOString(),
         notes: notes.trim() || undefined,

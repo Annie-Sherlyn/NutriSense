@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronLeft, ChevronRight, PlusCircle, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, Download } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
@@ -20,6 +20,38 @@ export const TodayPage: React.FC = () => {
   const [editQty, setEditQty] = useState(1);
   const [editPortion, setEditPortion] = useState<PortionSize>('regular');
   const [editPrep, setEditPrep] = useState<PreparationStyle>('normal');
+
+  const handleDownloadDailyLog = () => {
+    if (!todaySummary) return;
+    const lines = [
+      `NUTRISENSE DAILY MEAL & NUTRITION LOG`,
+      `Date: ${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}`,
+      `Total Calories: ${todaySummary.consumed.calories} kcal / ${todaySummary.targets.calories.target} kcal`,
+      `Total Protein: ${todaySummary.consumed.protein} g / ${todaySummary.targets.protein.target} g`,
+      `Total Carbs: ${todaySummary.consumed.carbs} g / ${todaySummary.targets.carbs.target} g`,
+      `Total Fat: ${todaySummary.consumed.fat} g / ${todaySummary.targets.fat.target} g`,
+      `----------------------------------------`,
+      `LOGGED MEALS:`,
+      `Meal Type,Food Name,Quantity,Portion,Calories,Protein (g)`,
+      ...(todaySummary.meals.length > 0
+        ? todaySummary.meals.flatMap((m) =>
+            m.items.map(
+              (it) =>
+                `${m.mealType},"${it.foodName}",${it.quantity},${it.portion},${it.macros.calories.max},${it.macros.protein.max}`
+            )
+          )
+        : ['No meals recorded for today yet.']),
+    ];
+
+    const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `nutrisense_daily_log_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const handleDeleteMeal = async (mealId: string) => {
     await nutritionService.deleteMeal(mealId);
@@ -88,14 +120,27 @@ export const TodayPage: React.FC = () => {
           />
         </div>
 
-        {/* Date Switcher */}
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-surface-light dark:bg-surface-dark px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 shadow-soft text-xs font-semibold">
-          <button className="p-1 hover:text-brand-light">
-            <ChevronLeft className="w-4 h-4" />
-          </button>
-          <span>Today, {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
-          <button className="p-1 hover:text-brand-light">
-            <ChevronRight className="w-4 h-4" />
+        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+          {/* Date Switcher */}
+          <div className="flex items-center gap-2 bg-surface-light dark:bg-surface-dark px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 shadow-soft text-xs font-semibold">
+            <button className="p-1 hover:text-brand-light">
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <span>Today, {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</span>
+            <button className="p-1 hover:text-brand-light">
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Download Daily Log Button */}
+          <button
+            type="button"
+            onClick={handleDownloadDailyLog}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest-900 text-white dark:bg-cream dark:text-forest-900 text-xs font-bold shadow-soft hover:opacity-90 transition-opacity"
+            title="Download Daily Meal Log CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download Log</span>
           </button>
         </div>
       </div>

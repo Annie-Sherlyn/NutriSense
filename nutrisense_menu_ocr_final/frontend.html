@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu OCR Tester</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: #f9fafb; color: #111827; }
+        .nav { background: #1f2937; color: white; padding: 1rem; }
+        .nav a { color: white; text-decoration: none; font-weight: bold; margin-right: 1rem; }
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .card { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); padding: 1.5rem; margin-bottom: 2rem; }
+        .upload-area { border: 2px dashed #d1d5db; border-radius: 8px; padding: 2rem; text-align: center; cursor: pointer; margin-bottom: 1rem; }
+        .upload-area:hover { border-color: #9ca3af; }
+        input[type="file"] { display: none; }
+        button { background: #2563eb; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 1rem; }
+        button:hover { background: #1d4ed8; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .layout { display: flex; gap: 2rem; flex-wrap: wrap; }
+        .col-image { flex: 1; min-width: 300px; }
+        .col-results { flex: 2; min-width: 400px; }
+        img.preview { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid #e5e7eb; }
+        
+        table { width: 100%; border-collapse: collapse; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        th, td { text-align: left; padding: 0.75rem; border-bottom: 1px solid #e5e7eb; }
+        th { background: #f3f4f6; font-weight: 600; }
+        .accepted { border-left: 4px solid #10b981; }
+        .review { border-left: 4px solid #f59e0b; }
+        .rejected { border-left: 4px solid #ef4444; }
+        
+        .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+        .stat-box { background: white; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); flex: 1; text-align: center; }
+        .stat-value { font-size: 2rem; font-weight: bold; }
+        .stat-label { color: #6b7280; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        
+        .debug-section { margin-top: 2rem; padding: 1rem; background: #f3f4f6; border-radius: 8px; }
+        .debug-content { display: none; font-family: monospace; font-size: 0.8rem; white-space: pre-wrap; background: #1f2937; color: #e5e7eb; padding: 1rem; border-radius: 4px; overflow-x: auto; margin-top: 1rem;}
+        
+        h2 { margin-top: 0; color: #111827; font-size: 1.25rem; }
+        h3 { font-size: 1.1rem; color: #374151; margin-top: 2rem; }
+        .error { color: #b91c1c; background: #fee2e2; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; display: none; }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <a href="#">Menu OCR</a>
+    </div>
+    
+    <div class="container">
+        <div class="card">
+            <h2>Upload Menu Image</h2>
+            <div class="upload-area" id="drop-zone" onclick="document.getElementById('file-input').click()">
+                <p id="file-name">Click to select or drag and drop JPG, PNG, WEBP</p>
+                <input type="file" id="file-input" accept=".jpg,.jpeg,.png,.webp" onchange="handleFileSelect(event)">
+            </div>
+            <button id="analyze-btn" disabled onclick="analyzeMenu()">Analyze Menu</button>
+        </div>
+        
+        <div id="error-msg" class="error"></div>
+        
+        <div id="results-container" style="display: none;">
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-accepted" style="color: #10b981;">0</div>
+                    <div class="stat-label">Accepted</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-review" style="color: #f59e0b;">0</div>
+                    <div class="stat-label">Needs Review</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-value" id="stat-rejected" style="color: #ef4444;">0</div>
+                    <div class="stat-label">Rejected Prices</div>
+                </div>
+            </div>
+            
+            <div class="layout">
+                <div class="col-image">
+                    <h3>Uploaded Image</h3>
+                    <img id="image-preview" class="preview" alt="Menu Preview">
+                    
+                    <h3 style="margin-top: 2rem;">Visual OCR Debug</h3>
+                    <img id="debug-image-preview" class="preview" alt="Visual Debug">
+                </div>
+                
+                <div class="col-results">
+                    <h3>A. ACCEPTED ITEMS</h3>
+                    <table class="accepted">
+                        <thead>
+                            <tr>
+                                <th>Dish</th>
+                                <th>Price</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="accepted-body"></tbody>
+                    </table>
+                    
+                    <h3>B. NEEDS REVIEW</h3>
+                    <table class="review">
+                        <thead>
+                            <tr>
+                                <th>Dish</th>
+                                <th>OCR Price</th>
+                                <th>Confidence</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="review-body"></tbody>
+                    </table>
+                    
+                    <h3>C. REJECTED / UNPAIRED PRICES</h3>
+                    <table class="rejected">
+                        <thead>
+                            <tr>
+                                <th>Price</th>
+                                <th>Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody id="rejected-body"></tbody>
+                    </table>
+                    
+                    <div class="debug-section">
+                        <button style="background: #4b5563; padding: 0.5rem 1rem; font-size: 0.875rem;" onclick="toggleDebug()">Show OCR Debug Information</button>
+                        <div id="debug-content" class="debug-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFile = null;
+        let rawResponse = null;
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (file) {
+                currentFile = file;
+                document.getElementById('file-name').textContent = `${file.name} (${Math.round(file.size/1024)} KB)`;
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('analyze-btn').disabled = false;
+                }
+                reader.readAsDataURL(file);
+                
+                // Hide results on new upload
+                document.getElementById('results-container').style.display = 'none';
+                document.getElementById('error-msg').style.display = 'none';
+            }
+        }
+
+        async function analyzeMenu() {
+            if (!currentFile) return;
+            
+            const btn = document.getElementById('analyze-btn');
+            const errorMsg = document.getElementById('error-msg');
+            const resultsContainer = document.getElementById('results-container');
+            
+            btn.disabled = true;
+            btn.textContent = 'Analyzing menu...';
+            errorMsg.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('image', currentFile);
+            
+            try {
+                const response = await fetch('http://localhost:8000/api/menu-ocr', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || data.error) {
+                    throw new Error(data.error || 'Server error');
+                }
+                
+                rawResponse = data;
+                displayResults(data);
+                resultsContainer.style.display = 'block';
+                
+            } catch (error) {
+                errorMsg.textContent = `Menu analysis failed. ${error.message}`;
+                errorMsg.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Analyze Menu';
+            }
+        }
+
+        function displayResults(data) {
+            // Stats
+            document.getElementById('stat-accepted').textContent = data.stats.accepted;
+            document.getElementById('stat-review').textContent = data.stats.needs_review;
+            document.getElementById('stat-rejected').textContent = data.stats.rejected_prices;
+            
+            // Accepted
+            const acceptedHtml = data.accepted_items.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.dish)}</td>
+                    <td>${escapeHtml(item.price)}</td>
+                    <td>${item.confidence}%</td>
+                </tr>
+            `).join('');
+            document.getElementById('accepted-body').innerHTML = acceptedHtml || '<tr><td colspan="3">No items</td></tr>';
+            
+            // Needs Review
+            const reviewHtml = data.needs_review.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.dish)}</td>
+                    <td>${escapeHtml(item.price)}</td>
+                    <td>${item.confidence}%</td>
+                    <td>${escapeHtml(item.reason)}</td>
+                </tr>
+            `).join('');
+            document.getElementById('review-body').innerHTML = reviewHtml || '<tr><td colspan="4">No items</td></tr>';
+            
+            // Rejected
+            const rejectedHtml = data.rejected_prices.map(item => `
+                <tr>
+                    <td>${escapeHtml(item.price)}</td>
+                    <td>${escapeHtml(item.reason)}</td>
+                </tr>
+            `).join('');
+            document.getElementById('rejected-body').innerHTML = rejectedHtml || '<tr><td colspan="2">No items</td></tr>';
+            
+            // Debug Image
+            if (data.debug_image) {
+                document.getElementById('debug-image-preview').src = data.debug_image;
+            }
+            
+            // Debug Info
+            document.getElementById('debug-content').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        function toggleDebug() {
+            const el = document.getElementById('debug-content');
+            el.style.display = el.style.display === 'block' ? 'none' : 'block';
+        }
+        
+        function escapeHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.toString()
+                 .replace(/&/g, "&amp;")
+                 .replace(/</g, "&lt;")
+                 .replace(/>/g, "&gt;")
+                 .replace(/"/g, "&quot;")
+                 .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

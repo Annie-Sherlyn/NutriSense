@@ -8,6 +8,9 @@ import { QuickSearchModal } from './QuickSearchModal';
 import { StreakModal } from './StreakModal';
 import { useApp } from '../../context/AppContext';
 
+import { WelcomeCelebration } from '../animations/WelcomeCelebration';
+import { MealNotificationBanner } from '../common/MealNotificationBanner';
+
 export const AppShell: React.FC = () => {
   const { isQuickSearchOpen, setIsQuickSearchOpen, streakModalOpen, setStreakModalOpen } =
     useApp();
@@ -19,6 +22,9 @@ export const AppShell: React.FC = () => {
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       className="min-h-screen bg-canvas-light dark:bg-canvas-dark text-ink-light dark:text-ink-dark flex flex-col md:flex-row transition-colors duration-base"
     >
+      {/* Dual-Side Confetti & Balloon Celebration on Login and Return */}
+      <WelcomeCelebration />
+
       {/* Desktop Sidebar */}
       <Sidebar />
 
@@ -27,6 +33,8 @@ export const AppShell: React.FC = () => {
         <TopBar />
 
         <main className="flex-1 px-4 sm:px-8 py-6 max-w-app w-full mx-auto">
+          {/* Contextual Meal Notification Alert with Toggle */}
+          <MealNotificationBanner />
           <Outlet />
         </main>
       </div>

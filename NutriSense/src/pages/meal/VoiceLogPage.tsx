@@ -6,6 +6,9 @@ import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { Waveform } from '../../components/animations/Waveform';
 import { speechService } from '../../services/speech.service';
+import { nutritionService } from '../../services/nutrition.service';
+import { profileService } from '../../services/profile.service';
+import { useApp } from '../../context/AppContext';
 import type { SpeechResult } from '../../types';
 
 export const VoiceLogPage: React.FC = () => {
@@ -22,12 +25,44 @@ export const VoiceLogPage: React.FC = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const analyserRef = useRef<AnalyserNode | null>(null);
   const animationFrameRef = useRef<number | null>(null);
+  const recognitionRef = useRef<any>(null);
+
+  React.useEffect(() => {
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      
+      recognition.onresult = (event: any) => {
+        let full = '';
+        for (let i = 0; i < event.results.length; i++) {
+          full += event.results[i][0].transcript;
+        }
+        recognition.transcript_value = full;
+        setTranscript(full);
+      };
+      
+      recognition.onerror = (e: any) => console.error('Speech recognition error', e);
+      recognitionRef.current = recognition;
+    }
+  }, []);
 
   const startRecording = async () => {
     try {
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         setMode('typed');
         return;
+      }
+
+      setTranscript('');
+      setSpeechResult(null);
+
+      // Start Web Speech API if available
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.start();
+        } catch (e) {}
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -48,15 +83,44 @@ export const VoiceLogPage: React.FC = () => {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+        if (recognitionRef.current) {
+          try {
+            recognitionRef.current.stop();
+          } catch (e) {}
+        }
+        
         setIsTranscribing(true);
         try {
-          const result = await speechService.transcribe(audioBlob);
-          setSpeechResult(result);
-          setTranscript(result.transcript);
-        } catch (e) {
-          console.error(e);
-        } finally {
+        if (recognitionRef.current && recognitionRef.current.transcript_value) {
+            // Instant text processing since we already have the browser transcript!
+            const text = recognitionRef.current.transcript_value;
+            const result = await speechService.parseTypedText(text);
+            setSpeechResult(result);
+            if (result.transcript) {
+              setTranscript(result.transcript);
+            }
+        } else {
+            // Fallback: if browser speech recognition failed, send the audio blob
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const result = await speechService.transcribe(audioBlob);
+            setSpeechResult(result);
+            if (result.transcript) {
+              setTranscript(result.transcript);
+            }
+        }
+      } catch (e) {
+        console.error(e);
+        // Absolute fallback if everything fails
+        if (recognitionRef.current && recognitionRef.current.transcript_value) {
+             const text = recognitionRef.current.transcript_value;
+             try {
+               const fallbackRes = await speechService.parseTypedText(text);
+               setSpeechResult(fallbackRes);
+             } catch(err) {
+               console.error(err);
+             }
+        }
+      } finally {
           setIsTranscribing(false);
         }
       };
@@ -98,17 +162,91 @@ export const VoiceLogPage: React.FC = () => {
     }
   };
 
-  const handleManualParse = () => {
+  const { refreshSummary, incrementStreak } = useApp();
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleManualParse = async () => {
     if (!manualText.trim()) return;
-    const res = speechService.parseTypedText(manualText);
+    const res = await speechService.parseTypedText(manualText);
     setSpeechResult(res);
     setTranscript(res.transcript);
   };
 
-  const handleConfirmItems = () => {
-    const topItem = speechResult?.extractedItems[0];
-    const foodId = topItem?.matchedFoodId || 'food-idli';
-    navigate(`/log/portion?foodId=${foodId}`);
+  const handleConfirmItems = async () => {
+    if (!speechResult) return;
+    
+    if (speechResult.status === 'needs_verification') {
+      alert('Your meal description was ambiguous. Please type it more clearly and try again.');
+      setMode('typed');
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const mealNut = speechResult.meal_nutrition || {};
+      const mk = (val: number, unit: string) => ({ min: Math.round(val * 0.9), max: Math.round(val * 1.1), unit });
+      
+      const totalMacros = {
+        calories: mk(mealNut.calories_kcal || 0, 'kcal'),
+        protein: mk(mealNut.protein_g || 0, 'g'),
+        carbs: mk(mealNut.carbs_g || 0, 'g'),
+        fat: mk(mealNut.fat_g || 0, 'g'),
+        fiber: mk(mealNut.fiber_g || 0, 'g'),
+      };
+      const totalMicros = {
+        iron: mk(mealNut.iron_mg || 0, 'mg'),
+        calcium: mk(mealNut.calcium_mg || 0, 'mg'),
+        b12: mk(mealNut.b12_mcg || 0, 'mcg'),
+        vitaminD: mk(mealNut.vitamind_mcg || 0, 'mcg'),
+      };
+
+      const items = speechResult.extractedItems.map((item) => ({
+        id: `item-${Date.now()}-${Math.random()}`,
+        foodId: item.matchedFoodId || 'food-unknown',
+        foodName: item.name,
+        image: '',
+        quantity: item.quantity,
+        portion: 'regular' as const,
+        preparationStyle: 'normal' as const,
+        macros: {
+          calories: { min: 0, max: 0, unit: 'kcal' },
+          protein: { min: 0, max: 0, unit: 'g' },
+          carbs: { min: 0, max: 0, unit: 'g' },
+          fat: { min: 0, max: 0, unit: 'g' },
+          fiber: { min: 0, max: 0, unit: 'g' },
+        },
+        micros: {
+          iron: { min: 0, max: 0, unit: 'mg' },
+          calcium: { min: 0, max: 0, unit: 'mg' },
+          b12: { min: 0, max: 0, unit: 'mcg' },
+        }
+      }));
+
+      const hr = new Date().getHours();
+      let mealType: 'breakfast' | 'lunch' | 'snack' | 'dinner' = 'dinner';
+      if (hr >= 5 && hr < 11) mealType = 'breakfast';
+      else if (hr >= 11 && hr < 15) mealType = 'lunch';
+      else if (hr >= 15 && hr < 19) mealType = 'snack';
+
+      await nutritionService.logMeal({
+        userId: profileService.getStableUserId(),
+        mealType,
+        loggedAt: new Date().toISOString(),
+        inputMethod: 'voice',
+        items,
+        totalMacros,
+        totalMicros,
+      });
+
+      await refreshSummary();
+      incrementStreak();
+      navigate('/log/success');
+    } catch (error) {
+      console.error(error);
+      alert('Failed to save meal. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -125,11 +263,11 @@ export const VoiceLogPage: React.FC = () => {
             <Waveform isRecording={isRecording} audioLevel={audioLevel} barCount={24} />
           </div>
 
-          <p className="text-sm font-semibold text-ink-light dark:text-ink-dark mb-1">
+          <p className="text-sm font-semibold text-ink-light dark:text-ink-dark mb-1 min-h-[1.5rem]">
             {isRecording
-              ? 'Listening… speak your meal'
+              ? transcript || 'Listening… speak your meal'
               : isTranscribing
-              ? 'Transcribing audio…'
+              ? transcript || 'Transcribing audio…'
               : 'Tap microphone and speak'}
           </p>
           <p className="text-xs text-ink-muted-light dark:text-ink-muted-dark max-w-xs mb-6">
@@ -211,14 +349,18 @@ export const VoiceLogPage: React.FC = () => {
             </span>
             <div className="flex flex-col gap-2">
               {speechResult.extractedItems.map((item, idx) => (
-                <div
-                  key={idx}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-surface-2-light dark:bg-surface-2-dark text-xs font-semibold"
-                >
-                  <span>{item.name}</span>
-                  <span className="font-mono text-brand-light dark:text-brand-dark">
-                    {item.quantity} {item.unit}
-                  </span>
+                <div key={idx} className="flex flex-col gap-1 p-2.5 rounded-xl bg-surface-2-light dark:bg-surface-2-dark">
+                  <div className="flex items-center justify-between text-xs font-semibold">
+                    <span>{item.name} {item.candidates && <span className="text-rose-500 ml-2">(Unrecognized)</span>}</span>
+                    <span className="font-mono text-brand-light dark:text-brand-dark">
+                      {item.quantity} {item.unit}
+                    </span>
+                  </div>
+                  {item.candidates && item.candidates.length > 0 && (
+                    <div className="text-[10px] text-ink-muted-light dark:text-ink-muted-dark mt-1">
+                      Did you mean: {item.candidates.map(c => c.food_name).join(', ')}?
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -227,6 +369,7 @@ export const VoiceLogPage: React.FC = () => {
           <Button
             size="lg"
             fullWidth
+            isLoading={isSaving}
             onClick={handleConfirmItems}
             rightIcon={<ChevronRight className="w-5 h-5" />}
           >

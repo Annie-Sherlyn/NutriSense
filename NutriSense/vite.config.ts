@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import path from 'path';
 
-const backendPort = process.env.VITE_BACKEND_PORT || '8000';
+const backendPort = process.env.VITE_BACKEND_PORT || '8003';
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -66,6 +66,11 @@ export default defineConfig({
     port: 5173,
     allowedHosts: true,
     proxy: {
+      '/api/food': {
+        target: 'http://127.0.0.1:8001',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+      },
       '/api': {
         target: `http://127.0.0.1:${backendPort}`,
         changeOrigin: true,

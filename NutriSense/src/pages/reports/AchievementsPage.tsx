@@ -1,17 +1,24 @@
 import React, { useState } from 'react';
-import { Award, Lock, CheckCircle2, Flame } from 'lucide-react';
+import { Award, Lock, Flame } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
-import { Button } from '../../components/common/Button';
-import { Modal } from '../../components/common/Modal';
 import { NutriMote } from '../../components/animations/NutriMote';
 import { triggerMoteBurst } from '../../components/animations/MoteBurst';
+import { RibbonCuttingBadgeModal } from '../../components/achievements/RibbonCuttingBadgeModal';
 import { useApp } from '../../context/AppContext';
 import type { Achievement } from '../../types';
 
 export const AchievementsPage: React.FC = () => {
   const { streakCount } = useApp();
   const [selectedBadge, setSelectedBadge] = useState<Achievement | null>(null);
+  const [mealCount, setMealCount] = useState<number>(0);
+
+  // Load real meal count from Supabase to drive achievement unlock status
+  React.useEffect(() => {
+    import('../../services/dashboard.service').then(({ dashboardService }) => {
+      dashboardService.getMealCountToday().then(setMealCount).catch(() => setMealCount(0));
+    });
+  }, []);
 
   const achievements: Achievement[] = [
     {
@@ -20,10 +27,10 @@ export const AchievementsPage: React.FC = () => {
       description: 'Logged your very first Indian meal on NutriSense.',
       moteType: 'protein',
       icon: '🌱',
-      progress: 1,
+      progress: Math.min(1, mealCount),
       maxProgress: 1,
-      unlocked: true,
-      unlockedAt: '16 Sep 2026',
+      unlocked: mealCount >= 1,
+      unlockedAt: mealCount >= 1 ? 'Today' : undefined,
     },
     {
       id: 'ach-3day-streak',
@@ -34,7 +41,7 @@ export const AchievementsPage: React.FC = () => {
       progress: Math.min(3, streakCount),
       maxProgress: 3,
       unlocked: streakCount >= 3,
-      unlockedAt: '18 Sep 2026',
+      unlockedAt: streakCount >= 3 ? `${streakCount}-day streak` : undefined,
     },
     {
       id: 'ach-protein-goal',
@@ -42,10 +49,9 @@ export const AchievementsPage: React.FC = () => {
       description: 'Hit 100% of your daily protein target through real-world Indian foods.',
       moteType: 'protein',
       icon: '💪',
-      progress: 1,
+      progress: mealCount >= 1 ? 1 : 0,
       maxProgress: 1,
-      unlocked: true,
-      unlockedAt: '18 Sep 2026',
+      unlocked: false, // Requires real nutrient gap calculation — locked until implemented
     },
     {
       id: 'ach-balanced-day',
@@ -53,10 +59,9 @@ export const AchievementsPage: React.FC = () => {
       description: 'Maintained protein, carbs, and fiber within balanced reference bands.',
       moteType: 'fiber',
       icon: '🌿',
-      progress: 1,
+      progress: 0,
       maxProgress: 1,
-      unlocked: true,
-      unlockedAt: '19 Sep 2026',
+      unlocked: false,
     },
     {
       id: 'ach-menu-explorer',
@@ -64,10 +69,9 @@ export const AchievementsPage: React.FC = () => {
       description: 'Scanned a physical restaurant menu and logged an optimal choice.',
       moteType: 'iron',
       icon: '📜',
-      progress: 1,
+      progress: 0,
       maxProgress: 1,
-      unlocked: true,
-      unlockedAt: '19 Sep 2026',
+      unlocked: false,
     },
     {
       id: 'ach-consistent-logger',
@@ -85,7 +89,7 @@ export const AchievementsPage: React.FC = () => {
       description: 'Target dietary iron, calcium, and B12 simultaneously.',
       moteType: 'b12',
       icon: '🔮',
-      progress: 2,
+      progress: 0,
       maxProgress: 3,
       unlocked: false,
     },
@@ -196,48 +200,13 @@ export const AchievementsPage: React.FC = () => {
         ))}
       </div>
 
-      {/* Badge Detail / Celebration Modal */}
-      <Modal
-        isOpen={Boolean(selectedBadge)}
-        onClose={() => setSelectedBadge(null)}
-        maxWidth="sm"
-      >
-        {selectedBadge && (
-          <div className="flex flex-col items-center text-center p-2">
-            <div className="mb-4">
-              <NutriMote
-                type={selectedBadge.moteType}
-                mood={selectedBadge.unlocked ? 'celebrating' : 'curious'}
-                size={72}
-              />
-            </div>
-
-            <h3 className="font-display font-bold text-2xl text-ink-light dark:text-ink-dark">
-              {selectedBadge.title}
-            </h3>
-            <p className="text-xs sm:text-sm text-ink-muted-light dark:text-ink-muted-dark mt-1 max-w-xs">
-              {selectedBadge.description}
-            </p>
-
-            <div className="p-3 my-4 rounded-2xl bg-surface-2-light dark:bg-surface-2-dark w-full text-xs">
-              {selectedBadge.unlocked ? (
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold flex items-center justify-center gap-1.5">
-                  <CheckCircle2 className="w-4 h-4" />
-                  <span>Achieved on {selectedBadge.unlockedAt || 'Recent meal'}</span>
-                </span>
-              ) : (
-                <span className="text-ink-muted-light font-medium">
-                  Progress: {selectedBadge.progress} of {selectedBadge.maxProgress} completed
-                </span>
-              )}
-            </div>
-
-            <Button size="md" fullWidth onClick={() => setSelectedBadge(null)}>
-              Close
-            </Button>
-          </div>
-        )}
-      </Modal>
+      {/* Interactive Ribbon-Cutting Ceremony & Celebration Modal */}
+      {selectedBadge && (
+        <RibbonCuttingBadgeModal
+          badge={selectedBadge}
+          onClose={() => setSelectedBadge(null)}
+        />
+      )}
     </div>
   );
 };

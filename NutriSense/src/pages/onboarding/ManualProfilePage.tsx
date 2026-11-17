@@ -22,14 +22,9 @@ const COMMON_ALLERGENS = [
   'Shellfish',
 ];
 
-const NUTRIENT_OPTIONS: Array<{ id: PriorityNutrient; label: string }> = [
-  { id: 'protein', label: 'Protein' },
-  { id: 'iron', label: 'Dietary Iron' },
-  { id: 'calcium', label: 'Calcium' },
-  { id: 'b12', label: 'Vitamin B12' },
-  { id: 'fiber', label: 'Dietary Fiber' },
-  { id: 'hydration', label: 'Hydration' },
-];
+  
+
+import { CANONICAL_21_NUTRIENTS, supabaseNutrientService } from '../../services/supabase/nutrient.service';
 
 export const ManualProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -61,6 +56,18 @@ export const ManualProfilePage: React.FC = () => {
       setCustomAllergy('');
     }
   };
+
+  const [availableNutrients, setAvailableNutrients] = useState<Array<{ id: string; label: string }>>(
+    CANONICAL_21_NUTRIENTS.map((n) => ({ id: n.slug, label: n.name }))
+  );
+
+  React.useEffect(() => {
+    supabaseNutrientService.getNutrients().then((nutrients) => {
+      if (nutrients && nutrients.length > 0) {
+        setAvailableNutrients(nutrients.map((n) => ({ id: n.slug, label: n.name })));
+      }
+    });
+  }, []);
 
   const toggleNutrient = (n: PriorityNutrient) => {
     setPriorityNutrients((prev) =>
@@ -164,13 +171,13 @@ export const ManualProfilePage: React.FC = () => {
               Priority Nutrients to Focus On
             </label>
             <div className="flex flex-wrap gap-2">
-              {NUTRIENT_OPTIONS.map((no) => {
-                const isSelected = priorityNutrients.includes(no.id);
+              {availableNutrients.map((no) => {
+                const isSelected = priorityNutrients.includes(no.id as any);
                 return (
                   <button
                     key={no.id}
                     type="button"
-                    onClick={() => toggleNutrient(no.id)}
+                    onClick={() => toggleNutrient(no.id as any)}
                     className={`px-3.5 py-2 rounded-full text-xs font-semibold transition-all min-h-[38px] ${
                       isSelected
                         ? 'bg-brand-light text-white shadow-soft dark:bg-brand-dark dark:text-ink-light'

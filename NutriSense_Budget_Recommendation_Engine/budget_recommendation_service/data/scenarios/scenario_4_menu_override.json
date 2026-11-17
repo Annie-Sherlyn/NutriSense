@@ -1,0 +1,25 @@
+{
+  "mode": "menu",
+  "budget": 120,
+  "meal_type": "breakfast",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "carbs_g": 30,
+    "protein_g": 10
+  },
+  "priority_nutrients": [
+    "protein_g"
+  ],
+  "menu": {
+    "restaurant": "Modern Tiffin House",
+    "items": [
+      {
+        "dish_name": "Plain Dosa",
+        "food_id": "dosa",
+        "price": 75,
+        "confidence": 0.98
+      }
+    ]
+  }
+}

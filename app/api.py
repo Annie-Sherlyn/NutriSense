@@ -1,5 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import re
 import shutil
@@ -20,6 +21,14 @@ from app.voice.speech_to_text import transcribe_audio
 
 app = FastAPI(title="NutriSense Voice API")
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 VOICE_ALIASES = {
     "beriani": "biryani",
     "biriani": "biryani",
@@ -29,6 +38,12 @@ VOICE_ALIASES = {
     "garlic clove": "garlic naan",
     "manjurian": "manchurian",
     "manjurion": "manchurian",
+    "eatleys": "idlis",
+    "eatly": "idli",
+    "italy": "idli",
+    "went bungle": "ven pongal",
+    "went bungalow": "ven pongal",
+    "when pongal": "ven pongal"
 }
 
 def normalize_transcript(text: str) -> str:
@@ -128,8 +143,43 @@ def get_today_meals():
     return get_today_meals_db()
 
 @app.post("/ocr/menu")
-async def ocr_menu():
-    return JSONResponse(status_code=501, content={"error": "OCR not yet available"})
+async def ocr_menu(image: UploadFile = File(...)):
+    import sys
+    import os
+    ocr_dir = os.path.join(os.path.dirname(__file__), '..', 'nutrisense_menu_ocr_final')
+    if ocr_dir not in sys.path:
+        sys.path.append(ocr_dir)
+    
+    try:
+        from pipeline.menu_ocr import MenuOCRPipeline
+        from utils.image import load_image_from_bytes
+        
+        contents = await image.read()
+        wrapper = load_image_from_bytes(contents)
+        pipeline = MenuOCRPipeline()
+        result = pipeline.process(wrapper)
+        
+        # map to frontend expected format
+        formatted_items = []
+        for i, item in enumerate(result.items):
+            formatted_items.append({
+                "id": f"menu-item-{i}",
+                "name": item.dish_name if hasattr(item, 'dish_name') else "Unknown Dish",
+                "price": float(item.price_numeric) if hasattr(item, 'price_numeric') and item.price_numeric else 0,
+                "category": getattr(item, 'category', 'Detected') or 'Detected',
+                "selected": True,
+                "matchedFoodId": "",  # the frontend allows empty
+                "confidence": getattr(item, 'confidence', 0.9)
+            })
+            
+        return JSONResponse(content={
+            "restaurantName": "Detected Menu",
+            "rawText": "Raw text unavailable",
+            "confidence": 0.9,
+            "items": formatted_items
+        })
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
 
 @app.post("/ocr/delivery-screenshot")
 async def ocr_delivery_screenshot():
@@ -154,8 +204,82 @@ async def speech_transcribe(audio: UploadFile = File(...)):
                 })
             data["extractedItems"] = mapped_items
             data["confidence"] = 0.95
+        elif data.get("status") == "needs_verification":
+            v = data.get("verification_payload", {})
+            mapped_items = []
+            for item in v.get("resolved_items", []):
+                mapped_items.append({
+                    "name": item.get("raw_label", "Unknown"),
+                    "quantity": item.get("quantity", 1),
+                    "unit": item.get("unit", "serving"),
+                    "matchedFoodId": item.get("resolved_food_id", "")
+                })
+            for item in v.get("unresolved_items", []):
+                raw = item.get("item", {})
+                mapped_items.append({
+                    "name": raw.get("raw_label", "Unknown"),
+                    "quantity": raw.get("quantity", 1),
+                    "unit": raw.get("unit", "serving"),
+                    "candidates": item.get("candidates", [])
+                })
+            data["extractedItems"] = mapped_items
+            data["confidence"] = 0.5
+
         return JSONResponse(content=data)
     return resp
+
+from pydantic import BaseModel
+class TextPayload(BaseModel):
+    text: str
+
+@app.post("/speech/text")
+async def speech_text(payload: TextPayload):
+    transcript = normalize_transcript(payload.text)
+    raw = RawInput(
+        input_id="api_voice_text_001",
+        timestamp=datetime.now(),
+        source="manual",
+        stage="post_meal",
+        raw_payload={"text": transcript}
+    )
+    resolved = resolve(raw)
+    
+    if isinstance(resolved, dict) and resolved.get("status") == "needs_verification":
+        return JSONResponse({
+            "transcript": transcript,
+            "status": "needs_verification",
+            "verification_payload": resolved
+        })
+        
+    db_path = os.path.join(os.path.dirname(__file__), "data", "foods.csv")
+    food_db = load_food_db(db_path)
+    
+    meal_nutrients = calculate_meal_nutrition(resolved)
+    daily_totals = aggregate_daily([meal_nutrients])
+    
+    targets = get_targets_for_profile(DEMO_PROFILE)
+    gaps = calculate_gaps(targets, daily_totals)
+    ranked = rank_gaps(gaps, DEMO_PROFILE.priority_nutrients)
+    suggested = suggest_foods(ranked, DEMO_PROFILE, food_db)
+    
+    parsed_items = []
+    for i in resolved.items:
+        parsed_items.append({
+            "raw_label": i.raw_label,
+            "quantity": i.quantity,
+            "unit": i.unit,
+            "resolved_food_id": i.resolved_food_id,
+            "match_confidence": i.match_confidence
+        })
+        
+    return JSONResponse({
+        "transcript": transcript,
+        "parsed_items": parsed_items,
+        "meal_nutrition": meal_nutrients,
+        "daily_nutrition": daily_totals,
+        "ranked_gaps": ranked[:5],
+        "suggested_foods": [s["name"] for s in suggested]
+    })
 
 @app.get("/nutrition/daily-summary")
 def get_daily_summary():

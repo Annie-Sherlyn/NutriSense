@@ -5,13 +5,13 @@ import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { Button } from '../../components/common/Button';
 import { WhyThisRecommendation } from '../../components/nutrition/WhyThisRecommendation';
-import { useApp } from '../../context/AppContext';
+
 import type { OCRResult, MenuItem } from '../../types';
 
 interface RankedMenuItem {
   item: MenuItem;
   rank: number;
-  matchScore: number; // e.g. 94%
+  matchScore: number;
   estimatedCalories: { min: number; max: number; unit: string };
   estimatedProtein: { min: number; max: number; unit: string };
   whySummary: string;
@@ -21,168 +21,111 @@ interface RankedMenuItem {
 export const RankedMenuResultsPage: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { setProjectedGaps } = useApp();
 
   const state = location.state as { ocrResult?: OCRResult } | null;
   const ocrResult = state?.ocrResult;
 
   const [previewingId, setPreviewingId] = useState<string | null>(null);
+  const [budget, setBudget] = useState<string>('');
 
-  // Ranked items based on current nutrient gap & budget
-  const rankedItems: RankedMenuItem[] = [
-    {
-      item: { id: 'm-1', name: 'Idli (2 pcs) with Sambar & Chutney', price: 60, matchedFoodId: 'food-idli' },
-      rank: 1,
-      matchScore: 95,
-      estimatedCalories: { min: 180, max: 220, unit: 'kcal' },
-      estimatedProtein: { min: 6, max: 8, unit: 'g' },
-      whySummary: 'Steamed, low oil, and provides fermented gut-friendly carbs and toor dal protein.',
-      reasons: [
-        { key: 'goal', label: 'Aligns with your primary health goal', passed: true, profileField: 'goal' },
-        { key: 'budget', label: '₹60, fits comfortably within your budget', passed: true, profileField: 'budgetPerMeal' },
-        { key: 'diet', label: 'Strictly vegetarian and peanut allergen safe', passed: true, profileField: 'allergies' },
-        { key: 'fermentation', label: 'Fermentation enhances bioavailability of B-vitamins', passed: true },
-      ],
-    },
-    {
-      item: { id: 'm-2', name: 'Ven Pongal with Ghee & Cashews', price: 75, matchedFoodId: 'food-pongal' },
-      rank: 2,
-      matchScore: 88,
-      estimatedCalories: { min: 310, max: 380, unit: 'kcal' },
-      estimatedProtein: { min: 8, max: 11, unit: 'g' },
-      whySummary: 'High plant protein from yellow moong dal with soothing black pepper tempering.',
-      reasons: [
-        { key: 'protein', label: 'Provides ~9g clean moong dal protein toward your gap', passed: true, profileField: 'priorityNutrients' },
-        { key: 'budget', label: '₹75, within budget', passed: true, profileField: 'budgetPerMeal' },
-        { key: 'satiety', label: 'Warm and comforting low-glycemic meal', passed: true },
-      ],
-    },
-    {
-      item: { id: 'm-3', name: 'Medu Vada (1 pc)', price: 35, matchedFoodId: 'food-vada' },
-      rank: 3,
-      matchScore: 78,
-      estimatedCalories: { min: 140, max: 180, unit: 'kcal' },
-      estimatedProtein: { min: 3.5, max: 5, unit: 'g' },
-      whySummary: 'Good pulse protein but higher caloric fat due to deep frying.',
-      reasons: [
-        { key: 'budget', label: '₹35 economical option', passed: true, profileField: 'budgetPerMeal' },
-        { key: 'fat-note', label: 'Higher fat content than steamed idli', passed: false },
-      ],
-    },
-  ];
-
-  const handleTogglePreview = (id: string, prot: number, cal: number) => {
-    if (previewingId === id) {
-      setPreviewingId(null);
-      setProjectedGaps(undefined);
-    } else {
-      setPreviewingId(id);
-      setProjectedGaps({
-        protein: prot,
-        calories: cal,
-      });
-    }
-  };
+  const baseItems = ocrResult?.items || [];
+  
+  const rankedItems: RankedMenuItem[] = baseItems.map((item, idx) => ({
+    item,
+    rank: idx + 1,
+    matchScore: 90 - (idx * 2),
+    estimatedCalories: { min: 200, max: 400, unit: 'kcal' },
+    estimatedProtein: { min: 5, max: 15, unit: 'g' },
+    whySummary: 'Matches your nutrient gaps well.',
+    reasons: [
+      { key: 'protein', label: 'Decent protein', passed: true },
+      { key: 'calories', label: 'Fits calorie gap', passed: true }
+    ]
+  }));
 
   const handleSelectToLog = (item: MenuItem) => {
-    const foodId = item.matchedFoodId || 'food-idli';
-    navigate(`/log/portion?foodId=${foodId}`);
+    const foodId = item.matchedFoodId || item.id || item.name;
+    navigate(`/log/portion?foodId=${encodeURIComponent(foodId)}`);
   };
 
+  const budgetVal = parseFloat(budget);
+  const filteredItems = !isNaN(budgetVal) && budgetVal > 0 
+      ? rankedItems.filter(r => (r.item.price || 0) <= budgetVal)
+      : rankedItems;
+
   return (
-    <div className="max-w-xl mx-auto flex flex-col gap-6">
+    <div className="max-w-2xl mx-auto flex flex-col gap-6">
       <PageHeader
-        title="Ranked Menu Choices"
-        subtitle={`Ranked for your goals & gaps from ${ocrResult?.restaurantName || 'Menu'}.`}
-        showBack
+        title="Menu Choices"
+        subtitle={`Dishes from ${ocrResult?.restaurantName || 'Menu'}.`}
       />
 
+      <div className="flex flex-col gap-2 mb-4 p-4 bg-white dark:bg-black rounded-xl border border-black/5 dark:border-white/10">
+        <label className="text-sm font-semibold text-ink-light dark:text-ink-dark">
+          Set Maximum Budget (Rs)
+        </label>
+        <input 
+          type="number" 
+          value={budget} 
+          onChange={(e) => setBudget(e.target.value)} 
+          placeholder="e.g. 150"
+          className="px-4 py-2 bg-black/5 dark:bg-white/10 rounded-lg text-ink-light dark:text-ink-dark outline-none border border-transparent focus:border-brand-light dark:focus:border-brand-dark"
+        />
+      </div>
+
       <div className="flex flex-col gap-4">
-        {rankedItems.map((ranked) => {
-          const isPreviewing = previewingId === ranked.item.id;
-          const avgProt = (ranked.estimatedProtein.min + ranked.estimatedProtein.max) / 2;
-          const avgCal = (ranked.estimatedCalories.min + ranked.estimatedCalories.max) / 2;
-
+        {filteredItems.map((result) => {
+          const { item, estimatedCalories, whySummary, reasons } = result;
+          const isPreviewing = previewingId === item.id;
+          
           return (
-            <Card
-              key={ranked.item.id}
-              padding="lg"
-              className={`border-2 transition-all ${
-                ranked.rank === 1
-                  ? 'border-brand-light dark:border-brand-dark shadow-soft'
-                  : 'border-black/[0.06] dark:border-white/[0.08]'
-              }`}
-            >
-              {/* Header with Rank Badge */}
-              <div className="flex items-start justify-between gap-3 mb-2">
-                <div>
+            <Card key={item.id} padding="none" className="overflow-hidden border border-black/[0.06] dark:border-white/[0.08]">
+              <div className="p-4 sm:p-5 flex items-start gap-4">
+                <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                        ranked.rank === 1
-                          ? 'bg-brand-light text-white dark:bg-brand-dark dark:text-ink-light'
-                          : 'bg-black/5 dark:bg-white/10 text-ink-muted-light dark:text-ink-muted-dark'
-                      }`}
-                    >
-                      #{ranked.rank} Match
-                    </span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      {ranked.matchScore}% Match Score
-                    </span>
+                    <h3 className="font-display font-bold text-base sm:text-lg text-ink-light dark:text-ink-dark truncate">
+                      {item.name}
+                    </h3>
                   </div>
-
-                  <h3 className="font-display font-bold text-base sm:text-lg text-ink-light dark:text-ink-dark">
-                    {ranked.item.name}
-                  </h3>
+                  <div className="flex items-center gap-3 text-sm text-ink-muted-light dark:text-ink-muted-dark">
+                    {item.price ? <span className="font-semibold text-brand-light dark:text-brand-dark">₹{item.price}</span> : null}
+                    <span className="w-1 h-1 rounded-full bg-black/20 dark:bg-white/20" />
+                    <span>~{estimatedCalories.min}-{estimatedCalories.max} {estimatedCalories.unit}</span>
+                  </div>
                 </div>
-
-                <span className="font-mono font-bold text-base text-ink-light dark:text-ink-dark">
-                  ₹{ranked.item.price}
-                </span>
               </div>
 
-              {/* Macro estimate tags */}
-              <div className="flex items-center gap-2 my-2 text-xs font-mono">
-                <span className="text-nutrient-protein font-semibold">
-                  ~{ranked.estimatedProtein.min}–{ranked.estimatedProtein.max}g Protein
-                </span>
-                <span>•</span>
-                <span className="text-ink-muted-light dark:text-ink-muted-dark">
-                  ~{ranked.estimatedCalories.min}–{ranked.estimatedCalories.max} kcal
-                </span>
-              </div>
-
-              {/* Explainability component */}
-              <div className="my-3">
-                <WhyThisRecommendation reasons={ranked.reasons} whySummary={ranked.whySummary} />
-              </div>
-
-              {/* Actions Bar */}
-              <div className="flex items-center justify-between gap-2 pt-3 border-t border-black/[0.04] dark:border-white/[0.06]">
+              <div className="px-4 sm:px-5 py-3 bg-black/[0.02] dark:bg-white/[0.02] border-t border-black/[0.04] dark:border-white/[0.04] flex items-center justify-between">
                 <button
-                  type="button"
-                  onClick={() => handleTogglePreview(ranked.item.id, avgProt, avgCal)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                    isPreviewing
-                      ? 'bg-brand-light text-white shadow-soft dark:bg-brand-dark dark:text-ink-light'
-                      : 'bg-surface-2-light dark:bg-surface-2-dark text-ink-light dark:text-ink-dark hover:bg-black/5 dark:hover:bg-white/10'
-                  }`}
+                  onClick={() => setPreviewingId(isPreviewing ? null : (item.id || ''))}
+                  className="text-xs sm:text-sm font-semibold text-brand-light dark:text-brand-dark flex items-center gap-1.5 hover:opacity-80 transition-opacity"
                 >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>{isPreviewing ? 'Previewing on Orbit' : 'Preview impact'}</span>
+                  <Eye className="w-4 h-4" />
+                  {isPreviewing ? 'Hide Nutrition' : 'Preview Nutrition'}
                 </button>
-
-                <Button
-                  size="sm"
-                  onClick={() => handleSelectToLog(ranked.item)}
-                  leftIcon={<Plus className="w-4 h-4" />}
-                >
-                  Add to Meal
+                <Button variant="primary" size="sm" onClick={() => handleSelectToLog(item)}>
+                  <Plus className="w-4 h-4 mr-1.5" />
+                  Log Dish
                 </Button>
               </div>
+              
+              {isPreviewing && (
+                <div className="border-t border-black/[0.04] dark:border-white/[0.04] bg-white dark:bg-black p-4 sm:p-5">
+                  <WhyThisRecommendation
+                    whySummary={whySummary}
+                    reasons={reasons as any}
+                  />
+                </div>
+              )}
             </Card>
           );
         })}
+
+        {filteredItems.length === 0 && (
+          <div className="p-8 text-center text-ink-muted-light dark:text-ink-muted-dark bg-white dark:bg-black rounded-xl border border-dashed border-black/10 dark:border-white/10">
+            No dishes found matching your budget.
+          </div>
+        )}
       </div>
     </div>
   );

@@ -31,7 +31,7 @@ export function normalizeError(error: unknown, fallbackMessage = 'An unexpected 
     if (error.name === 'AbortError') {
       return {
         code: 'NETWORK',
-        message: 'Request timed out after 20 seconds.',
+        message: 'Request timed out after 60 seconds. Model loading may be slow on CPU.',
         recoverable: true,
         action: 'Check your internet connection and retry.',
       };
@@ -53,7 +53,7 @@ export function normalizeError(error: unknown, fallbackMessage = 'An unexpected 
 }
 
 export async function request<T>(endpoint: string, options: RequestOptions = {}): Promise<T> {
-  const { timeoutMs = 20000, headers = {}, body, ...customConfig } = options;
+  const { timeoutMs = 60000, headers = {}, body, ...customConfig } = options;
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeoutMs);

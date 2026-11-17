@@ -1,0 +1,17 @@
+{
+  "mode": "general",
+  "budget": 50,
+  "meal_type": "snack",
+  "diet": "vegetarian",
+  "allergies": [],
+  "nutrient_gaps": {
+    "protein_g": 20,
+    "iron_mg": 5,
+    "fiber_g": 8
+  },
+  "priority_nutrients": [
+    "protein_g",
+    "iron_mg"
+  ],
+  "menu": null
+}

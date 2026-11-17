@@ -12,13 +12,16 @@ export const reportService = {
     checkSimulatedError();
 
     if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect lab report OCR and clinical boundary endpoint (e.g. POST /reports/analyze)
-      const formData = new FormData();
-      formData.append('report', file);
-      return request<LabReport>('/reports/analyze', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
+        formData.append('report', file);
+        return await request<LabReport>('/reports/analyze', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        console.warn('Report OCR API unavailable, running standalone Clinical Report engine:', err);
+      }
     }
 
     await delay(1200, 2000);

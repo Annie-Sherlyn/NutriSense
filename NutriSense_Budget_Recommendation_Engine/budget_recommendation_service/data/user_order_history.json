@@ -1,0 +1,42 @@
+{
+  "description": "Historical restaurant menu / online food order screenshot OCR scans stored per user",
+  "users": {
+    "user_returning_01": [
+      {
+        "food_id": "dosa",
+        "dish_name": "Plain Dosa",
+        "price": 70.0,
+        "source": "swiggy_receipt_ocr",
+        "timestamp": "2026-09-18T19:30:00"
+      },
+      {
+        "food_id": "dosa",
+        "dish_name": "Crispy Dosa",
+        "price": 80.0,
+        "source": "menu_photo_ocr",
+        "timestamp": "2026-09-22T08:45:00"
+      },
+      {
+        "food_id": "ven_pongal",
+        "dish_name": "Ven Pongal Ghee",
+        "price": 85.0,
+        "source": "zomato_invoice_ocr",
+        "timestamp": "2026-09-20T09:15:00"
+      },
+      {
+        "food_id": "ven_pongal",
+        "dish_name": "Ven Pongal",
+        "price": 95.0,
+        "source": "restaurant_bill_ocr",
+        "timestamp": "2026-09-24T08:30:00"
+      },
+      {
+        "food_id": "idly",
+        "dish_name": "Idly 2 pcs",
+        "price": 50.0,
+        "source": "swiggy_receipt_ocr",
+        "timestamp": "2026-09-25T08:00:00"
+      }
+    ]
+  }
+}

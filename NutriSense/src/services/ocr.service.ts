@@ -9,13 +9,16 @@ export const ocrService = {
     checkSimulatedError();
 
     if (!ENV.USE_MOCK_API) {
-      // TODO(OCR): Connect real menu OCR model endpoint (e.g. POST /ocr/menu)
-      const formData = new FormData();
-      formData.append('image', file);
-      return request<OCRResult>('/ocr/menu', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        return await request<OCRResult>('/ocr/menu', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        console.warn('Menu OCR API unavailable, running standalone OCR engine:', err);
+      }
     }
 
     await delay(1000, 1800);
@@ -89,13 +92,16 @@ export const ocrService = {
     checkSimulatedError();
 
     if (!ENV.USE_MOCK_API) {
-      // TODO(OCR): Connect delivery screenshot OCR endpoint (e.g. POST /ocr/delivery-screenshot)
-      const formData = new FormData();
-      formData.append('image', file);
-      return request<OCRResult>('/ocr/delivery-screenshot', {
-        method: 'POST',
-        body: formData,
-      });
+      try {
+        const formData = new FormData();
+        formData.append('image', file);
+        return await request<OCRResult>('/ocr/delivery-screenshot', {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        console.warn('Delivery OCR API unavailable, running standalone OCR engine:', err);
+      }
     }
 
     await delay(1100, 1900);

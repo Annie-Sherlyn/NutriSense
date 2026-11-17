@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, Save, Check, AlertCircle } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -36,14 +36,21 @@ export const EditProfilePage: React.FC = () => {
     { id: 'balanced-nutrition', label: 'Micro-Nutrient Balance (Iron & B12)' },
   ];
 
-  const availableNutrients: { id: PriorityNutrient; label: string }[] = [
-    { id: 'protein', label: 'Protein' },
-    { id: 'iron', label: 'Iron' },
-    { id: 'calcium', label: 'Calcium' },
-    { id: 'b12', label: 'Vitamin B12' },
-    { id: 'fiber', label: 'Dietary Fiber' },
-    { id: 'hydration', label: 'Hydration' },
-  ];
+
+  const [availableNutrients, setAvailableNutrients] = useState<{ id: PriorityNutrient | string; label: string }[]>([]);
+
+  useEffect(() => {
+    import('../../services/supabase/nutrient.service').then(({ supabaseNutrientService }) => {
+      supabaseNutrientService.getNutrients().then((nutrients) => {
+        if (nutrients.length > 0) {
+          setAvailableNutrients(nutrients.map(n => ({ id: n.slug, label: n.name })));
+        } else {
+          
+          setAvailableNutrients([]);
+        }
+      });
+    });
+  }, []);
 
   const availableAllergies = [
     'Peanuts',
@@ -291,12 +298,12 @@ export const EditProfilePage: React.FC = () => {
 
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-2">
             {availableNutrients.map((nutrient) => {
-              const selected = formData.priorityNutrients.includes(nutrient.id);
+              const selected = formData.priorityNutrients.includes(nutrient.id as any);
               return (
                 <button
                   type="button"
                   key={nutrient.id}
-                  onClick={() => handleNutrientToggle(nutrient.id)}
+                  onClick={() => handleNutrientToggle(nutrient.id as any)}
                   className={`flex items-center justify-between p-3 rounded-xl border text-left text-xs font-semibold transition-all ${
                     selected
                       ? 'border-forest-600 bg-forest-50/80 text-forest-950 shadow-sm'
@@ -372,3 +379,4 @@ export const EditProfilePage: React.FC = () => {
     </div>
   );
 };
+

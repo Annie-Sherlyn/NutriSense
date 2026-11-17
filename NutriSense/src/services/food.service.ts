@@ -1,7 +1,7 @@
 import { ENV } from '../config/env';
 import { request } from './api';
-import { MOCK_FOODS } from '../mocks/foods';
 import { delay, checkSimulatedError } from '../utils/delay';
+import { supabaseFoodService } from './supabase/food.service';
 import type { Food, FoodCandidate, FoodAnalysisResponse } from '../types';
 
 export const foodService = {
@@ -184,49 +184,19 @@ export const foodService = {
     ]);
   },
 
-  // Instant and debounced food search
+  // Instant and debounced food search strictly from the verified dataset & database
   async search(query: string): Promise<Food[]> {
-    checkSimulatedError();
-
-    if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect backend food search endpoint (e.g. GET /foods/search?q=)
-      return request<Food[]>(`/foods/search?q=${encodeURIComponent(query)}`);
-    }
-
-    await delay(200, 500);
-
-    const clean = query.trim().toLowerCase();
-    if (!clean) return MOCK_FOODS;
-
-    return MOCK_FOODS.filter((f) => {
-      return (
-        f.name.toLowerCase().includes(clean) ||
-        (f.regionalName && f.regionalName.toLowerCase().includes(clean)) ||
-        f.aliases.some((a) => a.toLowerCase().includes(clean)) ||
-        f.cuisine.toLowerCase().includes(clean) ||
-        f.tags.some((t) => t.toLowerCase().includes(clean))
-      );
-    });
+    return await supabaseFoodService.searchFoods(query);
   },
 
-  // Get complete nutrition profile of a food
+  // Get complete nutrition profile of a food by ID
   async getNutrition(id: string): Promise<Food | null> {
-    checkSimulatedError();
-
-    if (!ENV.USE_MOCK_API) {
-      // TODO(BACKEND): Connect food details endpoint (e.g. GET /foods/:id/nutrition)
-      return request<Food>(`/foods/${id}/nutrition`);
-    }
-
-    await delay(150, 400);
-    const found = MOCK_FOODS.find((f) => f.id === id);
-    return found || null;
+    const res = await supabaseFoodService.getFoodById(id);
+    return res.data;
   },
 
-  // Get all available seed foods
+  // Get all available foods (for Explore page)
   async getAllFoods(): Promise<Food[]> {
-    checkSimulatedError();
-    await delay(100, 300);
-    return MOCK_FOODS;
+    return await supabaseFoodService.searchFoods('');
   },
 };

@@ -3,11 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import {
   Calendar,
   ShieldAlert,
+  Download,
 } from 'lucide-react';
 import { PageHeader } from '../../components/common/PageHeader';
 import { Card } from '../../components/common/Card';
 import { EmptyState } from '../../components/common/EmptyState';
-import { nutritionService } from '../../services/nutrition.service';
+import { dashboardService } from '../../services/dashboard.service';
 import type { WeeklyNutritionSummary } from '../../types';
 
 export const ReportsPage: React.FC = () => {
@@ -18,9 +19,37 @@ export const ReportsPage: React.FC = () => {
     'proteinPct' | 'ironPct' | 'calciumPct' | 'b12Pct' | 'fiberPct'
   >('proteinPct');
 
+  const handleDownloadWeeklyReport = () => {
+    if (!summary) return;
+    const reportText = [
+      `NUTRISENSE WEEKLY NUTRITION REPORT`,
+      `Period: ${summary.weekLabel}`,
+      `Generated: ${new Date().toLocaleString('en-IN')}`,
+      `Consistency Score: ${summary.consistencyScore}%`,
+      `Most Improved Nutrient: ${summary.mostImprovedNutrient}`,
+      `Persistent Gap: ${summary.persistentGapNutrient}`,
+      `----------------------------------------`,
+      `DAILY BREAKDOWN:`,
+      `Day,Date,Protein %,Iron %,Calcium %,B12 %,Fiber %`,
+      ...summary.days.map(d => `${d.day},${d.date},${d.proteinPct}%,${d.ironPct}%,${d.calciumPct}%,${d.b12Pct}%,${d.fiberPct}%`),
+    ].join('\n');
+
+    const blob = new Blob([reportText], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `nutrisense_weekly_report_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   useEffect(() => {
-    nutritionService.getWeeklySummary().then((data) => {
+    dashboardService.getWeeklySummary().then((data) => {
       setSummary(data);
+      setIsLoading(false);
+    }).catch((err) => {
+      console.error(err);
       setIsLoading(false);
     });
   }, []);
@@ -62,9 +91,21 @@ export const ReportsPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex items-center gap-2 self-start sm:self-auto bg-surface-light dark:bg-surface-dark px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 shadow-soft text-xs font-semibold">
-          <Calendar className="w-3.5 h-3.5 text-brand-light dark:text-brand-dark" />
-          <span>{summary.weekLabel}</span>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <div className="flex items-center gap-2 bg-surface-light dark:bg-surface-dark px-3 py-1.5 rounded-full border border-black/10 dark:border-white/10 shadow-soft text-xs font-semibold">
+            <Calendar className="w-3.5 h-3.5 text-brand-light dark:text-brand-dark" />
+            <span>{summary.weekLabel}</span>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleDownloadWeeklyReport}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest-900 text-white dark:bg-cream dark:text-forest-900 text-xs font-bold shadow-soft hover:opacity-90 transition-opacity"
+            title="Download Weekly Report CSV"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Download CSV</span>
+          </button>
         </div>
       </div>
 

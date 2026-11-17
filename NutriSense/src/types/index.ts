@@ -260,11 +260,16 @@ export interface OCRResult {
 export interface SpeechResult {
   transcript: string;
   confidence: number;
+  status?: string;
+  verificationPayload?: any;
+  meal_nutrition?: any;
   extractedItems: Array<{
     name: string;
     quantity: number;
     unit?: string;
     matchedFoodId?: string;
+    matchConfidence?: number;
+    candidates?: Array<{ food_id: string; food_name: string }>;
   }>;
 }
 
