@@ -1,5 +1,7 @@
 # 🥗 NutriSense — Multimodal Explainable Nutrition Intelligence Platform
 
+[![Live Demo](https://img.shields.io/badge/Live%20App-timely--froyo--9a6b6f.netlify.app-00C7B7?style=for-the-badge&logo=netlify&logoColor=white)](https://timely-froyo-9a6b6f.netlify.app)
+
 [![React](https://img.shields.io/badge/Frontend-React%2018%20%7C%20TypeScript%20%7C%20Vite-61dafb?logo=react&logoColor=black)](https://react.dev/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI%20%7C%20Python%203.10+-009688?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![TensorFlow](https://img.shields.io/badge/Deep%20Learning-Keras%20%7C%20MobileNetV2-FF6F00?logo=tensorflow&logoColor=white)](https://www.tensorflow.org/)
@@ -7,6 +9,8 @@
 [![Auth](https://img.shields.io/badge/Auth-Firebase-FFCA28?logo=firebase&logoColor=black)](https://firebase.google.com/)
 [![Nutrition Standard](https://img.shields.io/badge/Standard-ICMR--NIN%202024%20RDA-4CAF50)](https://www.nin.res.in/)
 
+> 🚀 **Live Demo**: **[https://timely-froyo-9a6b6f.netlify.app](https://timely-froyo-9a6b6f.netlify.app)**
+> 
 > *"What should I eat next, based on what I have already eaten today and my budget?"*
 
 **NutriSense** is an end-to-end, multimodal, explainable nutrition intelligence platform engineered specifically for **Indian dietary habits**. Rooted in strict **ICMR-NIN (Indian Council of Medical Research – National Institute of Nutrition, 2024)** RDA guidelines, NutriSense removes guesswork and fake precision by combining computer vision dish detection, restaurant menu OCR, voice-driven meal parsing, real-time nutrient gap analytics, and a cost-constrained budget recommendation engine.
@@ -303,7 +307,10 @@ VITE_FIREBASE_APP_ID=your-app-id
 
 ### 5. Running the Application
 
-**Option A — Unified Startup**:
+**Option A — Try the Live Web App (No Installation Needed)**:
+Simply open **[https://timely-froyo-9a6b6f.netlify.app](https://timely-froyo-9a6b6f.netlify.app)** on any desktop or mobile browser.
+
+**Option B — Local Development**:
 ```bash
 # Terminal 1: Launch Backend API (Vision + Voice + Recommender)
 python main.py
